@@ -1,6 +1,6 @@
 (ExpressProject "WEGUI_OLED_xx32F103C8xx"
   (ProjectVersion "19981106")
-  (SoftwareVersion "17.4-2019 S037 (4108587)  [5/20/2023]-[06/12/25]")
+  (SoftwareVersion "17.4-2019 S037 (4108587)  [5/20/2023]-[06/14/25]")
   (ProjectType "PCB")
   (Folder "Design Resources"
     (Folder "Library")
@@ -11,9 +11,34 @@
     (File ".\wegui_oled_xx32f103c8xx_orcad162.dsn"
       (Type "Schematic Design"))
     (BuildFileAddedOrDeleted "x")
-    (CompileFileAddedOrDeleted "x"))
+    (CompileFileAddedOrDeleted "x")
+    (Netlist_TAB "0")
+    ("Create Allegro Netlist" "TRUE")
+    ("View Allegro Netlist Files" "FALSE")
+    ("Allegro Netlist Create DCF File" "FALSE")
+    ("Update Allegro Board" "FALSE")
+    ("Allegro Netlist Output Board File"
+       "allegro\WEGUI_OLED_XX32F103C8XX_ORCAD162.brd")
+    ("Allegro Netlist Remove Etch" "FALSE")
+    ("Allegro Netlist Place Changed Component" "ALWAYS_REPLACE")
+    ("Allegro Netlist Open Board in Allegro" "ALLEGRO")
+    ("Allegro Setup Backup Versions" "3")
+    ("Allegro Setup Ignore Constraints" "FALSE")
+    ("Allegro Setup Part Type Length" "255")
+    ("Allegro Netlist Combine Property String" "PCB Footprint")
+    ("Allegro Netlist Ignore Fixed Property" "FALSE")
+    ("Allegro Netlist User Defined Property" "FALSE"))
   (Folder "Layout")
-  (Folder "Outputs")
+  (Folder "Outputs"
+    (File ".\allegro\pstxnet.dat"
+      (Type "Report")
+      (DisplayName "pstxnet.dat"))
+    (File ".\allegro\pstxprt.dat"
+      (Type "Report")
+      (DisplayName "pstxprt.dat"))
+    (File ".\allegro\pstchip.dat"
+      (Type "Report")
+      (DisplayName "pstchip.dat")))
   (Folder "Referenced Projects")
   (Folder "PSpice Resources"
     (Folder "Simulation Profiles")
@@ -31,8 +56,8 @@
       (Path "Design Resources" ".\wegui_oled_xx32f103c8xx_orcad162.dsn")
       (Path "Design Resources" ".\wegui_oled_xx32f103c8xx_orcad162.dsn"
          "SCHEMATIC1")
-      (Select "Design Resources" ".\wegui_oled_xx32f103c8xx_orcad162.dsn"
-         "SCHEMATIC1" "PAGE1"))
+      (Path "Outputs")
+      (Select "Design Resources" ".\wegui_oled_xx32f103c8xx_orcad162.dsn"))
     (HierarchyView)
     (Doc
       (Type "COrCapturePMDoc")
@@ -42,12 +67,21 @@
     (Doc
       (Type "COrSchematicDoc")
       (Frame
-        (Placement "44 0 1 -1 -1 5 28 5 1674 28 753")
-        (Scroll "-234 0")
-        (Zoom "100")
+        (Placement "44 0 1 -1 -1 -1 -1 5 1674 28 753")
+        (Scroll "0 425")
+        (Zoom "166")
         (Occurrence "/"))
       (Path
-         "E:\ONEDRIVE\MCU_PROGRAM\LIBRARY\WEGUI_32\WEGUI_STM32F103C8_V0_1BETA\PCB\源文件\WEGUI_OLED_XX32F103C8XX_ORCAD162.DSN")
+         "E:\ONEDRIVE\MCU_PROGRAM\LIBRARY\WEGUI\WEGUI_OLED\资料\PCB\源文件\WEGUI_OLED_XX32F103C8XX_ORCAD162.DSN")
       (Schematic "SCHEMATIC1")
       (Page "PAGE1")))
-  (PartMRUSelector))
+  (PartMRUSelector
+    ("CAPACITOR POL"
+      (FullPartName "CAPACITOR POL.Normal")
+      (LibraryName "E:\ONEDRIVE\CADENCE\LIB\OBL\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (R2
+      (FullPartName "R2.Normal")
+      (LibraryName "E:\ONEDRIVE\CADENCE\LIB\OBL\DISCRETE.OLB")
+      (DeviceIndex "0")))
+  (ISPCBBASICLICENSE "false"))
