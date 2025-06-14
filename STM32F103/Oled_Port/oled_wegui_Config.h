@@ -38,8 +38,8 @@
 	* ----默认驱动接口----        ---默认按键接口---          外接ADC电位器接口 A1
 	* |--SPI--|  |--IIC--|       |OK   | A0  |确定|         (用于DEMO外部数据演示)
 	* |CS   A6|  |SDA B11|       |BACK | C15 |返回|    
-	* |RES B11|  |SCL B10|       |UP   | B13 | 上 |    
-	* |DC  B10|  |3V3 3V3|       |DOWN | B14 | 下 |    
+	* |DC  B11|  |SCL B10|       |UP   | B13 | 上 |    
+	* |RES B10|  |3V3 3V3|       |DOWN | B14 | 下 |    
 	* |SDA  A7|  |GND GND|       |LEFT | B15 | 左 |    
 	* |SCL  A5|                  |RIGHT| B12 | 右 |    
 	* |3V3 3V3|                                       
