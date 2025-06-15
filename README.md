@@ -1,3 +1,5 @@
+企鹅交流群787475855
+
 为节省接线问题, 本源码配套有开发板, 已开源, Allegro格式, 已打包GERBER, 可直接发出打样, 在资料文件夹里获取
 ![image](https://github.com/user-attachments/assets/c0a6d7dc-1bec-4e88-a16e-cd656e62bb61)
 
