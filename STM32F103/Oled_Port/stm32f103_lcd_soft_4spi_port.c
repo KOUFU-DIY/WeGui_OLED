@@ -792,16 +792,20 @@ uint8_t LCD_Refresh(void)
 uint8_t LCD_Refresh(void)
 {
 	//每page做校验,若校验码没变,则不刷新该page
-	static uint32_t sum1[GRAM_YPAGE_NUM];
+	static uint32_t crc[GRAM_YPAGE_NUM];
 	unsigned char ypage,x,ycount;
 	for(ypage=0;ypage<GRAM_YPAGE_NUM;ypage++)
 	{
-		uint32_t i_sum1=0x0000;
+		uint32_t i_crc=0x0000;
+		//-----方式1:CRC算法校验-----
+		CRC->CR = CRC_CR_RESET;//CRC_ResetDR();
 		for(x=0;x<SCREEN_WIDTH;x++)
 		{
-			i_sum1 = i_sum1 + (uint32_t)lcd_driver.LCD_GRAM[ypage][x]*x;
+			CRC->DR = lcd_driver.LCD_GRAM[ypage][x];//CRC_CalcCRC(lcd_driver.LCD_GRAM[ypage][x]);
 		}
-		if(sum1[ypage] != i_sum1)
+		i_crc = CRC->DR;//i_sum1 = CRC_GetCRC();
+		//---------------------------
+		if(crc[ypage] != i_crc)
 		{
 			uint8_t y=0;
 			LCD_Set_Addr(0,ypage*8,SCREEN_WIDTH-1,SCREEN_HIGH-1);
@@ -827,7 +831,7 @@ uint8_t LCD_Refresh(void)
 					}
 				}
 			}
-			sum1[ypage] = i_sum1;
+			crc[ypage] = i_crc;
 		}
 	}
 	LCD_CS_Set();
