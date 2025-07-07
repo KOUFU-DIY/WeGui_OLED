@@ -125,7 +125,7 @@ typedef volatile enum LCD_dma_step
 	
 
 
-extern lcd_dma_step_t DMA_State;
+extern volatile lcd_dma_step_t DMA_State;
 extern uint8_t DMA_reflash_step;
 
 
@@ -137,7 +137,7 @@ void LCD_Send_1Dat(uint8_t dat);//向屏幕发送1个数据
 void LCD_Send_nDat(uint8_t *p,uint16_t num);//向屏幕发送num个数据
 void LCD_Send_nCmd(uint8_t *p,uint16_t num);//向屏幕发送num个命令
 void LCD_DMA_SPIx_ISR(void);//需要移植到DMA完毕中断里
-void LCD_Refresh(void);
+uint8_t LCD_Refresh(void);
 
 	
 		

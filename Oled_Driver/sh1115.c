@@ -45,12 +45,12 @@ void SH1115_Set_Address_ypage(unsigned char page)
 void SH1115_Set_Address_x_ypage(unsigned char x,unsigned char page)
 {
 	//方式1:单字节发送
-	//SH1115_Set_Address_x(x);
-	//SH1115_Set_Address_ypage(page);
+	SH1115_Set_Address_x(x);
+	SH1115_Set_Address_ypage(page);
 	
-	//方式2:连续发送
-	uint8_t i[]={((x>>4) | 0x10),(x&0x0f),0xb0+page};
-	LCD_Send_nCmd(i,4);
+	//方式2:连续发送(优化等级开高了有问题)
+	//uint8_t i[]={((x>>4) | 0x10),(x&0x0f),0xb0+page};
+	//LCD_Send_nCmd(i,4);
 }
 
 /*--------------------------------------------------------------

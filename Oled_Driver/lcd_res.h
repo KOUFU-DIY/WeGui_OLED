@@ -59,6 +59,8 @@ typedef struct fonts
 		
 }fonts_t;
 
+extern const unsigned char demo_bitmap_128x64[];
+	
 extern const fonts_t ascii_SongTi_6X12;
 extern const fonts_t ascii_SongTi_8X16;
 extern const fonts_t SongTi_UTF8_12X12;

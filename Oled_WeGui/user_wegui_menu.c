@@ -91,7 +91,7 @@ menu_t m_App_ThemeClock =
 void Uart_Screen_App_Begin(void);
 void Uart_Screen_App_Loop(void);
 void Uart_Screen_App_Quit(void);
-void Uart_Screen_Before_Refresh(void);
+void Uart_Screen_Refresh(void);//刷新屏幕时执行,绘图
 menu_t m_App_UartScreen =
 {
 	.fatherMenu=&m_main,//父菜单
@@ -113,7 +113,7 @@ menu_t m_App_UartScreen =
 		.begin_fun=Uart_Screen_App_Begin,//菜单进入 执行一次
 		.loop_fun=Uart_Screen_App_Loop, //菜单功能 持续执行
 		.quit_fun=Uart_Screen_App_Quit, //菜单退出 执行一次
-		.before_refresh_fun = Uart_Screen_Before_Refresh//刷新屏幕前 执行一次
+		.refresh_fun = Uart_Screen_Refresh//刷新屏幕时执行,放绘图函数
 	}
 };
 

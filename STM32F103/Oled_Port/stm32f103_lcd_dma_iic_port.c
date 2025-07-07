@@ -1,10 +1,10 @@
-#include "oled_wegui_Config.h"
-#ifdef OLED_USE_DMA_IIC
+#include "lcd_wegui_Config.h"
+#if(LCD_PORT == _DMA_IIC)
 
 #include "stdint.h"
 #include "stm32f103_oled_dma_iic_port.h"
 
-
+#error ("error")
 /*--------------------------------------------------------------
   * STM32F103的IIC及其DMA存在问题,暂不支持DMA_IIC驱动
 ----------------------------------------------------------------*/

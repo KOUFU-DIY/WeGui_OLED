@@ -33,12 +33,12 @@ void SSD1327_Set_Addr_y(unsigned char y0,unsigned char y1)
 void SSD1327_Set_Addr(unsigned char x0,unsigned char y0,unsigned char x1,unsigned char y1)
 {
 	//方式1:单字节发送
-	//SSD1327_Set_Addr_x(x0,x1);
-	//SSD1327_Set_Addr_y(y0,y1);
+	SSD1327_Set_Addr_x(x0,x1);
+	SSD1327_Set_Addr_y(y0,y1);
 	
-	//方式2:连续发送
-	uint8_t i[]={0x15,x0,x1,0x75,y0,y1};
-	LCD_Send_nCmd(i,6);
+	//方式2:连续发送(优化等级开高了可能有问题)
+	//uint8_t i[]={0x15,x0,x1,0x75,y0,y1};
+	//LCD_Send_nCmd(i,6);
 }
 
 
@@ -66,18 +66,18 @@ void SSD1327_Init(void)
 {
 	LCD_Send_1Cmd(0xae);//Set display off
 	
-	//控制刷屏方向
-//	#define A0_Bit0_SEG_REMAPPING      1
-//	#define A0_Bit1_NIBBLE_REMAPPING   0
-//	#define A0_Bit2_INC_MODE           1
-//	#define A0_Bit4_COM_REMAPPING      0
-//	#define A0_Bit6_SPLITTING_COM_MODE 1
-	
-	#define A0_Bit0_SEG_REMAPPING      1 //SEG镜像
-	#define A0_Bit1_NIBBLE_REMAPPING   0 //根据屏幕制造商设置
-	#define A0_Bit2_INC_MODE           0 //90度旋转(连点不转,因此需要与驱动匹配)
-	#define A0_Bit4_COM_REMAPPING      1 //COM镜像
-	#define A0_Bit6_SPLITTING_COM_MODE 1 //根据屏幕制造商设置
+	//控制刷屏方向1
+	#define A0_Bit0_SEG_REMAPPING      1
+	#define A0_Bit1_NIBBLE_REMAPPING   0
+	#define A0_Bit2_INC_MODE           1
+	#define A0_Bit4_COM_REMAPPING      0
+	#define A0_Bit6_SPLITTING_COM_MODE 1
+	//控制刷屏方向2
+//	#define A0_Bit0_SEG_REMAPPING      1 //SEG镜像
+//	#define A0_Bit1_NIBBLE_REMAPPING   0 //根据屏幕制造商设置
+//	#define A0_Bit2_INC_MODE           0 //90度旋转(连点不转,因此需要与驱动匹配)
+//	#define A0_Bit4_COM_REMAPPING      1 //COM镜像
+//	#define A0_Bit6_SPLITTING_COM_MODE 1 //根据屏幕制造商设置
 	LCD_Send_1Cmd(0xa0);//Set re-map
 	LCD_Send_1Cmd((A0_Bit6_SPLITTING_COM_MODE<<6)|(A0_Bit4_COM_REMAPPING<<4)|(A0_Bit2_INC_MODE<<2)|(A0_Bit1_NIBBLE_REMAPPING<<1)|A0_Bit0_SEG_REMAPPING);//
 	

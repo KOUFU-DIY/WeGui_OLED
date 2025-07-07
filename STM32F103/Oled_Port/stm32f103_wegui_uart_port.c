@@ -552,7 +552,7 @@ static void Wegui_uart_rx_default_func()
 							uint8_t i[]={0x78,0x00,0x03,0x01,0x10,0x00};
 							uint8_t i2[]={0x78,0x00,0x03,0x01,0x10,0x01};
 							uint16_t num=0;
-							uint8_t *pgram = &lcd_driver.LCD_GRAM[0][0];
+							volatile uint8_t* pgram = &lcd_driver.LCD_GRAM[0][0];
 							
 							dat = Read_rxRing_buff();
 							if(dat == 0xEF)
@@ -656,7 +656,6 @@ static void Wegui_uart_rx_default_func()
 					}break;
 					case 0x03://[0]0x80 [2]0x03获取屏幕驱动方式[完成后返回: 头信息 0x81 0x03 驱动方式字符串]
 					{
-						
 						#if defined LCD_USE_SOFT_3SPI 
 						uint8_t i[]={0x78,0x00,0x0C,0x81,0x03,'s','o','f','t',' ','3','s','p','i','\0'};
 						#elif defined LCD_USE_SOFT_4SPI 
@@ -676,9 +675,9 @@ static void Wegui_uart_rx_default_func()
 					}break;
 					case 0x04://[0]0x80 [2]0x04获取屏幕刷新方式[完成后返回: 头信息 0x81 0x04 刷新方式字符串]
 					{
-						#if defined LCD_USE_FULL_REFRESH 
+						#if ((LCD_MODE == LCD_USE_FULL_BUFF_FULL_REFRESH) || (LCD_MODE == _PAGE_BUFF_FULL_UPDATE))
 						uint8_t i[]={0x78,0x00,0x08,0x81,0x04,'F','u','l','l','\0'};
-						#elif defined LCD_USE_DYNAMIC_REFRESH 
+						#elif ((LCD_MODE == LCD_USE_FULL_BUFF_DYNAMIC_REFRESH) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))
 						uint8_t i[]={0x78,0x00,0x0A,0x81,0x04,'D','y','n','a','m','i','c','\0'};
 						#else
 						uint8_t i[]={0x78,0x00,0x08,0x81,0x04,'O','t','h','e','r','\0'};
@@ -687,7 +686,12 @@ static void Wegui_uart_rx_default_func()
 					}break;
 					case 0x05://[0]0x80 [2]0x05获取屏幕软件版本[完成后返回: 头信息 0x81 0x05 版本字符串]
 					{
-						uint8_t i[]={0x78,0x00,0x0B,0x81,0x05,'V','0','.','3','B','e','t','a','\0'};
+						uint8_t i[]={0x78,0x00,0x0B,0x81,0x05,'V','0','.','4','B','e','t','a','\0'};
+						Wegui_UartSend_nDat((uint8_t*)i,sizeof(i)/sizeof(uint8_t));
+					}break;
+					case 0x06://[0]0x80 [2]0x06获取屏幕显存大小[完成后返回: 头信息 0x81 高8位 低8位 版本字符串]
+					{
+						uint8_t i[]={0x78,0x00,0x04,0x81,0x06,(GRAM_YPAGE_NUM*SCREEN_WIDTH)>>8,(GRAM_YPAGE_NUM*SCREEN_WIDTH)&0xff};
 						Wegui_UartSend_nDat((uint8_t*)i,sizeof(i)/sizeof(uint8_t));
 					}break;
 					
@@ -755,6 +759,7 @@ void Wegui_Uart_Port_Init(void)
 	
   /* USART configuration */
 	USART_InitStructure.USART_BaudRate = 921600;
+	//USART_InitStructure.USART_BaudRate = 2000000;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   USART_InitStructure.USART_Parity = USART_Parity_No;

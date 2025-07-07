@@ -33,7 +33,17 @@ const static uint8_t cal_1[] = {0x00,0x01,0x03,0x07,0x0F,0x1F,0x3F,0x7F,0xFF};//
 ----------------------------------------------------------------*/
 void lcd_driver_Write_0(uint16_t x,uint16_t ypage,uint8_t u8_value)
 {
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	lcd_driver.LCD_GRAM[ypage][x] &= (~u8_value);
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	if((ypage >= lcd_driver.lcd_refresh_ypage) && (ypage <= lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM-1))
+	{
+		lcd_driver.LCD_GRAM[ypage%GRAM_YPAGE_NUM][x] &= (~u8_value);
+	}
+	#endif
+	
 }
 /*--------------------------------------------------------------
   * 名称: lcd_driver_Write_1(uint16_t x,uint16_t ypage,uint8_t u8_value)
@@ -41,7 +51,17 @@ void lcd_driver_Write_0(uint16_t x,uint16_t ypage,uint8_t u8_value)
 ----------------------------------------------------------------*/
 void lcd_driver_Write_1(uint16_t x,uint16_t ypage,uint8_t u8_value)
 {
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	lcd_driver.LCD_GRAM[ypage][x] |= u8_value;
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	if((ypage >= lcd_driver.lcd_refresh_ypage) && (ypage <= lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM-1))
+	{
+		lcd_driver.LCD_GRAM[ypage%GRAM_YPAGE_NUM][x] |= u8_value;
+	}
+	#endif
+	
 }
 /*--------------------------------------------------------------
   * 名称: lcd_driver_Write_inv(uint16_t x,uint16_t ypage,uint8_t u8_value)
@@ -49,7 +69,16 @@ void lcd_driver_Write_1(uint16_t x,uint16_t ypage,uint8_t u8_value)
 ----------------------------------------------------------------*/
 void lcd_driver_Write_inv(uint16_t x,uint16_t ypage,uint8_t u8_value)
 {
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	lcd_driver.LCD_GRAM[ypage][x] ^= u8_value;
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	if((ypage >= lcd_driver.lcd_refresh_ypage) && (ypage <= lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM-1))
+	{
+		lcd_driver.LCD_GRAM[ypage%GRAM_YPAGE_NUM][x] ^= u8_value;
+	}
+	#endif
 }
 /*--------------------------------------------------------------
   * 名称: lcd_driver_Write_0_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
@@ -67,7 +96,18 @@ void lcd_driver_Write_0_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
 	if(ypage == lcd_driver.Box.ypage_max_temp)
 		u8_value = u8_value & lcd_driver.Box.ypage_max_temp;
 	
+	
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	lcd_driver.LCD_GRAM[ypage][x] &= (~u8_value);
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	if(ypage == lcd_driver.lcd_refresh_ypage)
+	{
+		lcd_driver.LCD_GRAM[0][x] &= (~u8_value);
+	}
+	#endif
+	
 }
 /*--------------------------------------------------------------
   * 名称: lcd_driver_Write_1_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
@@ -86,7 +126,18 @@ void lcd_driver_Write_1_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
 		u8_value = u8_value & lcd_driver.Box.ypage_max_temp;
 	if(u8_value == 0x00)
 		return;
+	
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	lcd_driver.LCD_GRAM[ypage][x] |= u8_value;
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	if(ypage == lcd_driver.lcd_refresh_ypage)
+	{
+		lcd_driver.LCD_GRAM[0][x] |= u8_value;
+	}
+	#endif
+	
 }
 
 /*--------------------------------------------------------------
@@ -106,7 +157,18 @@ void lcd_driver_Write_inv_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
 		u8_value = u8_value & lcd_driver.Box.ypage_max_temp;
 	if(u8_value == 0x00)
 		return;
+	
+	
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	lcd_driver.LCD_GRAM[ypage][x] ^= u8_value;
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	if(ypage == lcd_driver.lcd_refresh_ypage)
+	{
+		lcd_driver.LCD_GRAM[0][x] ^= u8_value;
+	}
+	#endif
 }
 
 
@@ -157,7 +219,7 @@ void OLED_Set_Driver_Mode(lcd_driver_mode_t mode)
   * 传入: (x_min,y_min)起始点 (x_max,y_max)终点
   * 功能: 设置高级驱动的限制区域(Box)
 ----------------------------------------------------------------*/
-void OLED_Set_Driver_Box(uint8_t x_min ,uint8_t y_min ,uint8_t x_max,uint8_t y_max)
+void OLED_Set_Driver_Box(uint16_t x_min ,uint16_t y_min ,uint16_t x_max,uint16_t y_max)
 {
 	lcd_driver.Box.x_min = x_min;
 	lcd_driver.Box.x_max = x_max;
@@ -181,6 +243,7 @@ void OLED_Set_Driver_Box(uint8_t x_min ,uint8_t y_min ,uint8_t x_max,uint8_t y_m
 	}
 }
 
+
 /*--------------------------------------------------------------
   * 名称: OLED_Draw_One_Byte(int16_t x,int16_t y,uint8_t u8_value)
   * 传入1: (x,y)坐标
@@ -188,12 +251,22 @@ void OLED_Set_Driver_Box(uint8_t x_min ,uint8_t y_min ,uint8_t x_max,uint8_t y_m
   * 功能: 将u8_page值以对其坐标的方式写到显存
   * 说明: 坐标点x,y支持负数
 ----------------------------------------------------------------*/
-void OLED_Draw_One_Byte(int16_t x,int16_t y,uint8_t u8_page)
+void OLED_Draw_One_Byte(int16_t x,volatile int16_t y,uint8_t u8_page)
 {
-	if((x<0)||(x>(SCREEN_WIDTH-1))||(y>=SCREEN_HIGH))
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
+	if((x<0)||(x>(SCREEN_WIDTH-1))||(y>=SCREEN_HIGH)||(y+8<0))
 	{
 		return;
 	}
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	if((x<0)||(x>(SCREEN_WIDTH-1))||(y >= ((lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM)*8))||(y+8 < (lcd_driver.lcd_refresh_ypage*8)))
+	{
+		return;
+	}
+	#endif
+	
 	if (y>=0)
 	{
 		uint8_t start_page  = y/8;
@@ -201,7 +274,7 @@ void OLED_Draw_One_Byte(int16_t x,int16_t y,uint8_t u8_page)
 		lcd_driver.Write_GRAM(x,start_page,(u8_page<<page_offset));
 		if(page_offset!=0)
 		{
-			if(start_page < (GRAM_YPAGE_NUM-1))
+			if(start_page < (((SCREEN_HIGH+7)/8)-1))
 			{
 				lcd_driver.Write_GRAM(x,start_page+1,(u8_page>>(8-page_offset)));
 			}
@@ -616,11 +689,22 @@ void OLED_Clear_Box(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max)
 		y_max = temp;
 	}
 	if(x_min < 0){x_min=0;}
-	if(x_max > (SCREEN_WIDTH-1)){x_max = (SCREEN_WIDTH-1);}
 	if(y_min < 0){y_min=0;}
+	if(x_max > (SCREEN_WIDTH-1)){x_max = (SCREEN_WIDTH-1);}
+
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	if(y_max > (SCREEN_HIGH-1)){y_max = (SCREEN_HIGH-1);}
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	uint16_t max = (lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM)*8;
+	if(y_max > max){y_max = max;}
+	if((y_min >= max)||(y_max < (lcd_driver.lcd_refresh_ypage*8)))
+	{
+		return;
+	}
+	#endif
 	if((x_min>x_max)||(y_min>y_max)){return;}//错误值,不绘画
-	
 
 	
 	ypage   = y_min / 8;
@@ -710,9 +794,22 @@ void OLED_Fill_Box(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max)
 		y_max = temp;
 	}
 	if(x_min < 0){x_min=0;}
-	if(x_max > (SCREEN_WIDTH-1)){x_max = (SCREEN_WIDTH-1);}
 	if(y_min < 0){y_min=0;}
+	if(x_max > (SCREEN_WIDTH-1)){x_max = (SCREEN_WIDTH-1);}
+
+	
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	if(y_max > (SCREEN_HIGH-1)){y_max = (SCREEN_HIGH-1);}
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	uint16_t max = (lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM)*8;
+	if(y_max > max){y_max = max;}
+	if((y_min >= max)||(y_max < (lcd_driver.lcd_refresh_ypage*8)))
+	{
+		return;
+	}
+	#endif
 	if((x_min>x_max)||(y_min>y_max)){return;}//错误值,不绘画
 	
 
@@ -812,11 +909,22 @@ void OLED_Draw_Box(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max)
 ----------------------------------------------------------------*/
 void OLED_Draw_Bitmap(int16_t x0,int16_t y0,uint8_t sizex,uint8_t sizey,uint8_t BMP[])
 {
-	uint8_t i = 0;
-	
+	uint32_t i;
 	uint8_t xi;
 	uint8_t yi;
 	
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
+
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	if((x0+sizex<0)||(x0>(SCREEN_WIDTH-1))||(y0 >= ((lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM)*8))||(y0+sizey < (lcd_driver.lcd_refresh_ypage*8)))
+	{
+		return;
+	}
+	#endif
+	
+	i=0;
 	for(yi=0;yi<sizey;yi+=8)
 	{
 		int16_t y=y0+yi;
@@ -975,7 +1083,20 @@ void OLED_Draw_RBox(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max, u
 ----------------------------------------------------------------*/
 void OLED_Draw_Ascii(int16_t x,int16_t y,uint8_t chr)
 {
-	//不存在的值
+
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
+	
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	if((y > (lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM)*8)|| ((y + lcd_driver.fonts_ASCII->high) < (lcd_driver.lcd_refresh_ypage*8)))
+	{
+		return;
+	}
+	#endif
+	
+	
+		//不存在的值
 	if((chr<0x20)||(chr>=0x7F))
 	{
 		return;
@@ -1071,6 +1192,17 @@ void OLED_Draw_int32(int16_t x,int16_t y,int16_t num)
 void OLED_Draw_Unicode(int16_t x,int16_t y,unicode_t unicode_id)
 {
 	uint16_t i=0;
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
+	
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	if((y > (lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM)*8)|| ((y + lcd_driver.fonts_UTF8_cut->high) < (lcd_driver.lcd_refresh_ypage*8)))
+	{
+		return;
+	}
+	#endif
+	
 	
 	while((lcd_driver.fonts_UTF8_cut->unicode_index[i]!=0x00)/*&&(lcd_driver.fonts_UTF8_cut->unicode_index[i+1]!=0x00)*/)
 	{
@@ -1110,13 +1242,26 @@ void OLED_Draw_Unicode(int16_t x,int16_t y,unicode_t unicode_id)
 ----------------------------------------------------------------*/
 void OLED_Draw_UTF8_String(int16_t x,int16_t y,uint8_t *p)
 {
-	int16_t x_0;
+	volatile int16_t x_0;
+	
+	
+	//---------全屏缓存-----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	if((x>SCREEN_WIDTH)||(y>(SCREEN_HIGH-1)))
 	{
 		return;
 	}
 	x_0 = x;
 	while((*p!=0x00)&&(y<SCREEN_HIGH))
+	//---------单页缓存-----------
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	if((x>SCREEN_WIDTH)||(y>(lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM)*8))
+	{
+		return;
+	}
+	x_0 = x;
+	while((*p!=0x00)&&(y<(lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM)*8))
+	#endif
 	{
 		uint8_t temp = *p & 0xF8;
 		if(temp<=0x7F)//单字节
@@ -1161,7 +1306,6 @@ void OLED_Draw_UTF8_String(int16_t x,int16_t y,uint8_t *p)
 			unicode_t unicode_id;
 			unicode_id.u8[0]=(*p<<4)|((*(p+1)>>2)&0x0F);
 			unicode_id.u8[1]=(*(p+1)<<6)|((*(p+2))&0x3F);
-				
 			OLED_Draw_Unicode(x,y,unicode_id);
 			x += lcd_driver.fonts_UTF8_cut->width + lcd_driver.fonts_UTF8_cut->scape;
 			p+=3;
@@ -1391,7 +1535,6 @@ uint16_t OLED_Get_UTF8_YLine(uint8_t *p)
 void OLED_Fill_value_GRAM(uint8_t value)
 {
 	unsigned char i,n;
-	
 	for(i=0;i<GRAM_YPAGE_NUM;i++)
 	{
 			for(n=0;n<SCREEN_WIDTH;n++)
@@ -1456,11 +1599,17 @@ void lcd_driver_Init(void)
 	//OLED_Set_Driver_Mode(write_1_inBox);      //限制区域内写1模式(高级) 白点模式
 	//OLED_Set_Driver_Mode(write_inverse_inBox);//限制区域内反写模式(高级)
 	OLED_Set_Driver_Box(0,0,SCREEN_WIDTH-1,SCREEN_HIGH-1);//设置"高级"驱动的"限制区域"
-	
 	//----------默认驱动模式-----------
 	
+	//-----------显存初始化------------
 	OLED_Clear_GRAM();
-	LCD_Refresh();
+	#if ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	lcd_driver.lcd_refresh_ypage=0;//页缓存专用变量, 记录当前刷的是第页
+	#endif
+	//-----------显存初始化------------
+	
+	while(LCD_Refresh()!=0);
+
 }
 
 	

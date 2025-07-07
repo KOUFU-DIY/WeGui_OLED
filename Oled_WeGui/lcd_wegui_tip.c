@@ -216,34 +216,39 @@ void Wegui_Tip_Value_Dec()
 
 void Wegui_show_tip(uint16_t farmes, uint16_t Tms)
 {
+
 	if(Wegui.tip.state != FREE)
 	{
-		uint8_t pid_p;
-		switch(Wegui.tip.state)
+		if(farmes != 0)
 		{
-			default:
-			case ENTERING://弹窗正在进入
-				pid_p = 2;//进入动画更快
-				break;
-			case DISPLAYING://弹窗正在展示
-				pid_p = 2;//进入动画更快
-				break;
-			case EXITING://弹窗正在退出
-				pid_p = 3;//退出动画更慢
-				break;
+			uint8_t pid_p;
+			switch(Wegui.tip.state)
+			{
+				default:
+				case ENTERING://弹窗正在进入
+					pid_p = 2;//进入动画更快
+					break;
+				case DISPLAYING://弹窗正在展示
+					pid_p = 2;//进入动画更快
+					break;
+				case EXITING://弹窗正在退出
+					pid_p = 3;//退出动画更慢
+					break;
+			}
+			//使用P(PID)的方式,使当前值接近目标值 
+			//(cur_value:当前变量, target_value目标值, P:[0快:15慢], count:连续处理count次)
+			//Value_Change_PID_P(cur_value,target_value,P,count)
+			Value_Change_PID_P( Wegui.tip.cur_x,//当前x位置
+													Wegui.tip.pos_x,//目标x位置
+													pid_p,
+													farmes);
+			
+			Value_Change_PID_P( Wegui.tip.cur_y,//当前y位置
+													Wegui.tip.pos_y,//目标y位置
+													pid_p,
+													farmes);
 		}
-		//使用P(PID)的方式,使当前值接近目标值 
-		//(cur_value:当前变量, target_value目标值, P:[0快:15慢], count:连续处理count次)
-		//Value_Change_PID_P(cur_value,target_value,P,count)
-		Value_Change_PID_P( Wegui.tip.cur_x,//当前x位置
-												Wegui.tip.pos_x,//目标x位置
-												pid_p,
-												farmes);
 		
-		Value_Change_PID_P( Wegui.tip.cur_y,//当前y位置
-												Wegui.tip.pos_y,//目标y位置
-												pid_p,
-												farmes);
 		
 		uint8_t string_yline = OLED_Get_UTF8_YLine(Wegui.tip.string);//字符串分了多少行
 		switch(Wegui.tip.type)

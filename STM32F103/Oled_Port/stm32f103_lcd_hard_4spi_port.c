@@ -1,6 +1,6 @@
 #include "lcd_Wegui_Config.h"
 
-#ifdef LCD_USE_HARD_4SPI
+#if(LCD_PORT == _HARD_4SPI)
 
 
 #define LCD_SPIx                   SPI1
@@ -147,7 +147,7 @@ void LCD_Port_Init(void)
 	SPI_Init(LCD_SPIx, &SPI_InitStructure);
 	SPI_Cmd(LCD_SPIx, ENABLE);
 	
-	#if defined(LCD_USE_DYNAMIC_REFRESH)
+	#if ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE) || (LCD_MODE ==_PAGE_BUFF_DYNA_UPDATE))
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, ENABLE);//动态刷新CRC校验用
 	#endif
 	
@@ -225,7 +225,7 @@ void LCD_Port_Init(void)
 	SPI_Init(LCD_SPIx, &SPI_InitStructure);
 	SPI_Cmd(LCD_SPIx, ENABLE);
 	
-	#if defined(LCD_USE_DYNAMIC_REFRESH)
+	#if ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE) || (LCD_MODE ==_PAGE_BUFF_DYNA_UPDATE))
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, ENABLE);
 	#endif
 	
@@ -334,11 +334,9 @@ void LCD_Send_nCmd(uint8_t *p,uint16_t num)
 //----------------------------普通OLED屏幕刷屏接口-------------------------------------
 #if defined (LCD_USE_NORMAL_OLED)
 
-#if defined(LCD_USE_FULL_REFRESH)
 //---------方式1:全屏刷新----------
-//--优点:全屏刷新
-//--缺点:内容不变的区域也参与了刷新
-void LCD_Refresh(void)
+#if (LCD_MODE == _FULL_BUFF_FULL_UPDATE)
+uint8_t LCD_Refresh(void)
 {
 	unsigned char ypage;
 	for(ypage=0;ypage<(SCREEN_HIGH/8);ypage++)
@@ -346,13 +344,11 @@ void LCD_Refresh(void)
 		LCD_Set_Addr(0,ypage);
 		LCD_Send_nDat(&lcd_driver.LCD_GRAM[ypage][0],SCREEN_WIDTH);
 	}
+	return 0;
 }
-
-#elif defined(LCD_USE_DYNAMIC_REFRESH)
 //---------方式2:动态刷新----------
-//--优点:性能好,按需区域刷新,节省MCU资源
-//--缺点:全屏刷新相对变慢
-void LCD_Refresh(void)
+#elif (LCD_MODE == _FULL_BUFF_DYNA_UPDATE)
+uint8_t LCD_Refresh(void)
 {
 	//每page做"sum+mini_crc组合"校验,若校验码没变,则不刷新该page
 	static uint32_t sum1[GRAM_YPAGE_NUM];
@@ -377,6 +373,67 @@ void LCD_Refresh(void)
 		}
 		sum1[ypage] = i_sum1;
 	}
+	return 0;
+}
+
+//---------方式3:页缓存全局刷新----------
+#elif (LCD_MODE == _PAGE_BUFF_FULL_UPDATE)
+
+uint8_t LCD_Refresh(void)
+{
+	uint8_t i=0;
+	
+	for(i=0;i<GRAM_YPAGE_NUM;i++)
+	{
+		LCD_Set_Addr(0,lcd_driver.lcd_refresh_ypage);
+		LCD_Send_nDat(&lcd_driver.LCD_GRAM[i][0],SCREEN_WIDTH);
+		lcd_driver.lcd_refresh_ypage++;
+		if(lcd_driver.lcd_refresh_ypage >= ((SCREEN_HIGH+7)/8))
+		{
+			lcd_driver.lcd_refresh_ypage = 0;
+			break;
+		}
+	}
+	return lcd_driver.lcd_refresh_ypage;
+}
+//---------方式4:页缓存动态刷新----------
+#elif (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE)
+uint8_t LCD_Refresh(void)
+{
+	//每page做校验,若校验码没变,则不刷新该page
+	static uint32_t crc[((SCREEN_HIGH+7)/8)];
+	unsigned char ypage,x;
+
+	for(ypage=0;ypage<GRAM_YPAGE_NUM;ypage++)
+	{
+		uint32_t i_crc;
+
+		//-----方式1:CRC算法校验-----
+		CRC->CR = CRC_CR_RESET;//CRC_ResetDR();
+		for(x=0;x<SCREEN_WIDTH;x++)
+		{
+			CRC->DR = lcd_driver.LCD_GRAM[ypage][x];//CRC_CalcCRC(lcd_driver.LCD_GRAM[ypage][x]);
+		}
+		i_crc = CRC->DR;//i_sum1 = CRC_GetCRC();
+		//---------------------------
+
+		if(crc[lcd_driver.lcd_refresh_ypage + ypage] != i_crc)
+		{
+			if(crc[lcd_driver.lcd_refresh_ypage + ypage] != i_crc)
+			{
+				LCD_Set_Addr(0,lcd_driver.lcd_refresh_ypage + ypage);
+				LCD_Send_nDat(&lcd_driver.LCD_GRAM[ypage][0],SCREEN_WIDTH);
+			}
+			crc[lcd_driver.lcd_refresh_ypage + ypage] = i_crc;
+		}
+	}
+	
+	lcd_driver.lcd_refresh_ypage += GRAM_YPAGE_NUM;
+	if(lcd_driver.lcd_refresh_ypage >= ((SCREEN_HIGH+7)/8))
+	{
+		lcd_driver.lcd_refresh_ypage = 0;
+	}
+	return lcd_driver.lcd_refresh_ypage;
 }
 #endif
 
@@ -385,11 +442,9 @@ void LCD_Refresh(void)
 //----------------------------灰度OLED屏幕刷屏接口-------------------------------------
 #elif defined (LCD_USE_GRAY_OLED)//灰度OLED
 
-#if defined(LCD_USE_FULL_REFRESH)
-//---------方式1:全屏刷新----------
-//--优点:全屏刷新
-//--缺点:内容不变的区域也参与了刷新
-void LCD_Refresh(void)
+#if (LCD_MODE == _FULL_BUFF_FULL_UPDATE)
+//---------方式1:全缓存全屏刷新----------
+uint8_t LCD_Refresh(void)
 {
 	unsigned char x,y,i;
 	#if defined(GRAY_DRIVER_0DEG)
@@ -461,14 +516,14 @@ void LCD_Refresh(void)
 	while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
 	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
 	LCD_CS_Set();
+	
+	return 0;
 }
 
 
-#elif defined(LCD_USE_DYNAMIC_REFRESH)
-//---------方式2:动态刷新----------
-//--优点:性能好,按需区域刷新,节省MCU资源
-//--缺点:全屏刷新相对变慢
-void LCD_Refresh(void)
+#elif (LCD_MODE == _FULL_BUFF_DYNA_UPDATE)
+//---------方式2:全缓存动态刷新----------
+uint8_t LCD_Refresh(void)
 {
 	//每page做"sum+mini_crc组合"校验,若校验码没变,则不刷新该page
 	static uint32_t sum1[GRAM_YPAGE_NUM];
@@ -538,12 +593,9 @@ void LCD_Refresh(void)
 						i = GRAY_COLOUR<<4;
 					}
 					//----第二个点----
-					if((y+1)<SCREEN_HIGH)
+					if(lcd_driver.LCD_GRAM[ypage][x]&(0x01<<(y+1)))
 					{
-						if(lcd_driver.LCD_GRAM[ypage][x]&(0x01<<(y+1)))
-						{
-							i |= GRAY_COLOUR;
-						}
+						i |= GRAY_COLOUR;
 					}
 					while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
 					LCD_SPIx->DR = i;
@@ -556,6 +608,206 @@ void LCD_Refresh(void)
 		}
 		sum1[ypage] = i_sum1;
 	}
+	return 0;
+}
+//---------方式3:页缓存全局刷新----------
+#elif (LCD_MODE == _PAGE_BUFF_FULL_UPDATE)
+uint8_t LCD_Refresh(void)
+{
+	unsigned char x,y,i;
+	#if defined(GRAY_DRIVER_0DEG)
+	//---扫描方向1(不旋转)----
+	LCD_Set_Addr(0,lcd_driver.lcd_refresh_ypage*8,(SCREEN_WIDTH/2-1),(SCREEN_HIGH-1));
+	LCD_DC_Set();
+	LCD_CS_Clr();
+	for(y=0;(y+lcd_driver.lcd_refresh_ypage*8)<SCREEN_HIGH;)
+	{
+		uint8_t page,mask;
+		page=y/8;
+		mask=(0x01<<y%8);
+		for(x=0;x<SCREEN_WIDTH;)
+		{
+			i = 0x00;
+			//第一个点
+			if(lcd_driver.LCD_GRAM[page][x]&mask)
+			{
+				i = GRAY_COLOUR<<4;
+			}
+			x++;
+			//第二个点
+			if(x<SCREEN_WIDTH)
+			{
+				if(lcd_driver.LCD_GRAM[page][x]&mask)
+				{
+					i |= GRAY_COLOUR;
+				}
+			}
+			x++;
+			while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+			LCD_SPIx->DR = i;
+		}
+		y++;
+		if(y>=(GRAM_YPAGE_NUM*8))
+		{
+			break;
+		}
+	}
+
+	#elif defined(GRAY_DRIVER_90DEG)
+	//---扫描方向2(90度旋转)---
+	LCD_Set_Addr(lcd_driver.lcd_refresh_ypage*4,0,(SCREEN_HIGH/2-1),(SCREEN_WIDTH-1));
+	LCD_DC_Set();
+	LCD_CS_Clr();
+	for(y=0;(y+lcd_driver.lcd_refresh_ypage*8)<SCREEN_HIGH;)
+	{
+		uint8_t page1,page2,mask1,mask2;
+		page1=y/8;
+		page2=(y+1)/8;
+		mask1=(0x01<<y%8);
+		mask2=(0x01<<(y+1)%8);
+		for(x=0;x<SCREEN_WIDTH;x++)
+		{
+			i = 0x00;
+			//第一个点
+			if(lcd_driver.LCD_GRAM[page1][x]&mask1)
+			{
+				i = GRAY_COLOUR<<4;
+			}
+			//第二个点
+			if((y+1)<SCREEN_HIGH)
+			{
+				if(lcd_driver.LCD_GRAM[page2][x]&mask2)
+				{
+					i |= GRAY_COLOUR;
+				}
+			}
+			while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+			LCD_SPIx->DR = i;
+		}
+		y+=2;
+		if(y>=(GRAM_YPAGE_NUM*8))
+		{
+			break;
+		}
+	}
+	#endif
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
+	LCD_CS_Set();
+	
+	lcd_driver.lcd_refresh_ypage += GRAM_YPAGE_NUM;
+	if(lcd_driver.lcd_refresh_ypage >= ((SCREEN_HIGH+7)/8))
+	{
+		lcd_driver.lcd_refresh_ypage = 0;
+	}
+	return lcd_driver.lcd_refresh_ypage;
+}
+
+//---------方式4:页缓存动态刷新----------
+#elif (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE)
+uint8_t LCD_Refresh(void)
+{
+	//每page做"sum+mini_crc组合"校验,若校验码没变,则不刷新该page
+	static uint32_t crc[((SCREEN_HIGH+7)/8)];
+	unsigned char ypage,x,y,i,ycount;
+	for(ypage=0;ypage<GRAM_YPAGE_NUM;ypage++)
+	{
+		uint32_t i_crc;
+
+		//-----方式1:CRC算法校验-----
+		CRC->CR = CRC_CR_RESET;//CRC_ResetDR();
+		for(x=0;x<SCREEN_WIDTH;x++)
+		{
+			CRC->DR = lcd_driver.LCD_GRAM[ypage][x];//CRC_CalcCRC(lcd_driver.LCD_GRAM[ypage][x]);
+		}
+		i_crc = CRC->DR;//i_crc = CRC_GetCRC();
+		//---------------------------
+
+
+		if(crc[ypage] != i_crc)
+		{
+			ycount = 8* ypage;
+#if defined(GRAY_DRIVER_0DEG)
+			//----扫描方向1(不旋转)---
+			LCD_Set_Addr(0,lcd_driver.lcd_refresh_ypage*8+ycount,(SCREEN_WIDTH/2-1),(SCREEN_HIGH-1));
+			LCD_DC_Set();
+			LCD_CS_Clr();
+			
+			for(y=0;y<8;y++)
+			{
+				uint8_t mask;
+				ycount++;
+				if((ycount >= SCREEN_HIGH)||(y>=(GRAM_YPAGE_NUM*8))){break;}
+
+				mask=0x01<<(y%8);
+				for(x=0;x<SCREEN_WIDTH;)
+				{
+					//----第一个点----
+					i = 0x00;
+					if(lcd_driver.LCD_GRAM[ypage][x]&mask)
+					{
+						i = GRAY_COLOUR<<4;
+					}
+					//----第二个点----
+					x++;
+					if((lcd_driver.LCD_GRAM[ypage][x]&mask)&&(x<SCREEN_WIDTH))
+					{
+						i |= GRAY_COLOUR;
+					}
+					x++;
+					while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+					LCD_SPIx->DR = i;
+				}
+			}
+
+#elif defined(GRAY_DRIVER_90DEG)
+			//---扫描方向2(90度旋转)----
+			LCD_Set_Addr(lcd_driver.lcd_refresh_ypage*4 + ycount/2,0,((SCREEN_HIGH+1)/2-1),(SCREEN_WIDTH-1));
+			LCD_DC_Set();
+			LCD_CS_Clr();
+			for(y=0;y<8;)
+			{
+				if(++ycount >= SCREEN_HIGH){break;}
+				for(x=0;x<SCREEN_WIDTH;x++)
+				{
+					//(4位一个点)
+					//----第一个点----
+					i = 0x00;
+					//j = y + lcd_driver.lcd_refresh_ypage*8;
+					//if((j+1)<=SCREEN_HIGH)
+					{
+						if(lcd_driver.LCD_GRAM[ypage][x]&(0x01<<y))
+						{
+							i = GRAY_COLOUR<<4;
+						}
+						//----第二个点----
+						//if((j+1)<SCREEN_HIGH)
+						{
+							if(lcd_driver.LCD_GRAM[ypage][x]&(0x01<<(y+1)))
+							{
+								i |= GRAY_COLOUR;
+							}
+						}
+					}
+					while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+					LCD_SPIx->DR = i;
+				}
+				y+=2;
+			}
+#endif
+			while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+			while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
+			LCD_CS_Set();
+		}
+		crc[ypage] = i_crc;
+	}
+	
+	lcd_driver.lcd_refresh_ypage += GRAM_YPAGE_NUM;
+	if(lcd_driver.lcd_refresh_ypage >= ((SCREEN_HIGH+7)/8))
+	{
+		lcd_driver.lcd_refresh_ypage = 0;
+	}
+	return lcd_driver.lcd_refresh_ypage;
 }
 #endif
 
@@ -564,11 +816,9 @@ void LCD_Refresh(void)
 //----------------------------RGB565屏幕刷屏接口-------------------------------------
 #elif defined (LCD_USE_RGB565)
 
-#if defined(LCD_USE_FULL_REFRESH)
-//---------方式1:全屏从上往下刷----------
-//--优点:全屏刷新
-//--缺点:内容不变的区域也参与了刷新
-void LCD_Refresh(void)
+#if (LCD_MODE == _FULL_BUFF_FULL_UPDATE)
+//---------方式1:全缓存全屏刷----------
+uint8_t LCD_Refresh(void)
 {
 	uint16_t x,y;
 	LCD_Set_Addr(0,0,SCREEN_WIDTH-1,SCREEN_HIGH-1);
@@ -598,14 +848,12 @@ void LCD_Refresh(void)
 	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
 	LCD_CS_Set();
 	Set_SPI_DataSize_8b();
+	return 0;
 }
 
-#elif defined(LCD_USE_DYNAMIC_REFRESH)
-//---------方式2:page校验从上往下刷----------
-//--降低全屏刷新速度,换取区域刷新功能,减少MCU占用
-//--优点:性能好,按需区域刷新,节省MCU资源
-//--缺点:全屏刷新变慢,个别画面会刷错,图形错误撕裂
-void LCD_Refresh(void)
+#elif (LCD_MODE == _FULL_BUFF_DYNA_UPDATE)
+//---------方式2:全缓存动态刷----------
+uint8_t LCD_Refresh(void)
 {
 	//每page做校验,若校验码没变,则不刷新该page
 	static uint32_t sum1[GRAM_YPAGE_NUM];
@@ -665,6 +913,124 @@ void LCD_Refresh(void)
 	}
 	LCD_CS_Set();
 	Set_SPI_DataSize_8b();
+	return 0;
+}
+#elif (LCD_MODE == _PAGE_BUFF_FULL_UPDATE)
+//---------方式3:页缓存全屏刷新----------
+uint8_t LCD_Refresh(void)
+{
+	uint16_t x,y;
+	LCD_Set_Addr(0,lcd_driver.lcd_refresh_ypage*8,SCREEN_WIDTH-1,SCREEN_HIGH-1);
+	
+	Set_SPI_DataSize_16b();
+	LCD_DC_Set();
+	LCD_CS_Clr();
+	for(y=0;(y+lcd_driver.lcd_refresh_ypage*8)<SCREEN_HIGH;)
+	{
+		for(x=0;x<SCREEN_WIDTH;x++)
+		{
+			if(lcd_driver.LCD_GRAM[y/8][x]&(0x01<<(y%8)))
+			{
+				//绘图色
+				while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+				LCD_SPIx->DR = LCD_DRAW_COLOUR;
+			}
+			else
+			{
+				//背景色
+				while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+				LCD_SPIx->DR = LCD_CLEAR_COLOUR;
+			}
+		}
+		y++;
+		if(y>=(GRAM_YPAGE_NUM*8))
+		{
+			break;
+		}
+	}
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
+	LCD_CS_Set();
+	Set_SPI_DataSize_8b();
+	
+	lcd_driver.lcd_refresh_ypage += GRAM_YPAGE_NUM;
+	if(lcd_driver.lcd_refresh_ypage >= ((SCREEN_HIGH+7)/8))
+	{
+		lcd_driver.lcd_refresh_ypage = 0;
+	}
+	return lcd_driver.lcd_refresh_ypage;
+}
+#elif (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE)
+//---------方式4:页缓存动态刷新----------
+uint8_t LCD_Refresh(void)
+{
+	//每page做校验,若校验码没变,则不刷新该page
+	static uint32_t crc[((SCREEN_HIGH+7)/8)];
+	unsigned char ypage,x,ycount;
+
+	for(ypage=0;ypage<GRAM_YPAGE_NUM;ypage++)
+	{
+		uint32_t i_crc;
+
+		//-----方式1:CRC算法校验-----
+		CRC->CR = CRC_CR_RESET;//CRC_ResetDR();
+		for(x=0;x<SCREEN_WIDTH;x++)
+		{
+			CRC->DR = lcd_driver.LCD_GRAM[ypage][x];//CRC_CalcCRC(lcd_driver.LCD_GRAM[ypage][x]);
+		}
+		i_crc = CRC->DR;//i_sum1 = CRC_GetCRC();
+		//---------------------------
+
+		if(crc[lcd_driver.lcd_refresh_ypage + ypage] != i_crc)
+		{
+			uint8_t y=0;
+			
+			LCD_Set_Addr(0,(lcd_driver.lcd_refresh_ypage+ypage)*8,SCREEN_WIDTH-1,SCREEN_HIGH-1);
+			LCD_DC_Set();
+			LCD_CS_Clr();
+			Set_SPI_DataSize_16b();
+			
+			ycount = 8* (ypage + lcd_driver.lcd_refresh_ypage);
+			for(y=0;y<8;y++)
+			{
+				uint8_t x,mask;
+				if(++ycount >= SCREEN_HIGH)
+				{
+					break;
+				}
+				mask=0x01<<(y%8);
+				for(x=0;x<SCREEN_WIDTH;x++)
+				{
+					if(lcd_driver.LCD_GRAM[ypage][x]&mask)
+					{
+						//绘图色
+						while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+						LCD_SPIx->DR = LCD_DRAW_COLOUR;
+					}
+					else
+					{
+						//背景色
+						while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+						LCD_SPIx->DR = LCD_CLEAR_COLOUR;
+					}
+				}
+			}
+			crc[lcd_driver.lcd_refresh_ypage + ypage] = i_crc;
+			while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+			while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
+			LCD_CS_Set();
+			Set_SPI_DataSize_8b();
+		}
+	}
+	LCD_CS_Set();
+	Set_SPI_DataSize_8b();
+	
+	lcd_driver.lcd_refresh_ypage += GRAM_YPAGE_NUM;
+	if(lcd_driver.lcd_refresh_ypage >= ((SCREEN_HIGH+7)/8))
+	{
+		lcd_driver.lcd_refresh_ypage = 0;
+	}
+	return lcd_driver.lcd_refresh_ypage;
 }
 #endif
 

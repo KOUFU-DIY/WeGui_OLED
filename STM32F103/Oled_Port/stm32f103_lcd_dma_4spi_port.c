@@ -1,6 +1,6 @@
 #include "lcd_Wegui_Config.h"
 
-#ifdef LCD_USE_DMA_4SPI
+#if(LCD_PORT == _DMA_4SPI)
 
 
 #include "stm32f103_lcd_dma_4spi_port.h"
@@ -16,7 +16,7 @@
 #define RCC_APB2Periph_SPIx          RCC_APB2Periph_SPI1
 
 
-lcd_dma_step_t  DMA_State = DMA_FREE;
+volatile lcd_dma_step_t  DMA_State = DMA_FREE;
 uint8_t DMA_reflash_step=0;
 
 
@@ -97,7 +97,7 @@ void LCD_Port_Init(void)
 	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
 	NVIC_Init(&NVIC_InitStruct);
 	
-	#if defined(LCD_USE_DYNAMIC_REFRESH)
+	#if (LCD_MODE == _FULL_BUFF_DYNA_UPDATE)
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, ENABLE);//DMA暂不支持动态刷新 无需CRC
 	#endif
 	
@@ -240,7 +240,7 @@ void LCD_Send_nCmd(uint8_t *p,uint16_t num)
 	OLED_DMA_CHANNELx->CNDTR = (uint32_t)num; 
 	DMA_Cmd(OLED_DMA_CHANNELx, ENABLE);
 }
-
+#endif
 
 
 
@@ -265,17 +265,18 @@ void LCD_Send_nCmd(uint8_t *p,uint16_t num)
 //----------------------------普通OLED屏幕刷屏接口-------------------------------------
 #if defined (LCD_USE_NORMAL_OLED)
 
-#if defined(LCD_USE_FULL_REFRESH)
+#if (LCD_MODE == _FULL_BUFF_FULL_UPDATE)
 //---------方式1:全屏刷新----------
 //--优点:全屏刷新
 //--缺点:内容不变的区域也参与了刷新
-void LCD_Refresh(void)
+uint8_t LCD_Refresh(void)
 {
 	while(DMA_State != DMA_FREE){;}
 	DMA_reflash_step = 0;
 	DMA_State = DMA_REFLASH_DAT;
 	LCD_Set_Addr(0,0);//发送DMA 激活DMA
 	//DMA中断里执行余下指令
+	return 0;
 }
 void DMA1_Channel3_IRQHandler()
 {
@@ -307,7 +308,6 @@ void DMA1_Channel3_IRQHandler()
 				{
 					DMA_reflash_step = 0;
 					DMA_State = DMA_DONE;
-					
 				}
 			}break;
 			case DMA_DONE:
@@ -319,45 +319,30 @@ void DMA1_Channel3_IRQHandler()
 		}
 }
 
-#elif defined(LCD_USE_DYNAMIC_REFRESH)
-//动态刷新不支持dma方式
-#error("Dynamic Refresh not support dma driver yet!")
+#elif (LCD_MODE == _FULL_BUFF_DYNA_UPDATE)
+	//动态刷新不支持dma方式
+	#error("DYNA_UPDATE mode not support dma4spi driver yet!")
+#elif (LCD_MODE == _PAGE_BUFF_FULL_UPDATE)
+	//页刷新不支持dma方式
+	#error("PAGE_BUFF mode not support dma4spi driver yet!")
+#elif (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE)
+	//页刷新不支持dma方式
+	#error("PAGE_BUFF mode not support dma4spi driver yet!")
 #endif
 
 //----------------------------灰度OLED屏幕刷屏接口-------------------------------------
 #elif defined (LCD_USE_GRAY_OLED)//灰度OLED
 	//灰度OLED屏不支持dma4spi方式驱动 请更改屏幕驱动方式
-#error ("Gray OLED not support dma4spi driver yet!Use 4spi_driver please!")
+	#error ("Gray OLED not support dma4spi driver yet!Use 4spi_driver please!")
 
 //----------------------------RGB565屏幕刷屏接口-------------------------------------
 #elif defined (LCD_USE_RGB565)
 	//彩屏TFT屏不支持dma4spi方式驱动 请更改屏幕驱动方式
 	#error ("TFT not support dma4spi driver yet!");
+#else
+	#error ("Not support LCD!");
 #endif
 
-
-
-
-
-
-
-
-
-
-
-#if (defined(LCD_USE_DYNAMIC_REFRESH) && (defined(LCD_USE_DMA_4SPI)))
-	//DMA方式暂不支持动态刷新
-	#warning ("SPI_DMA_Driver not support dynamic refresh yet")
-#endif
-
-
-
-//-------------------------------------------以下是RGB屏幕专用驱动接口----------------------------------------------
-#elif defined (LCD_USE_RGB565)
-//彩屏TFT屏暂不支持DMA方式驱动(硬件SPI已经跑满,无需DMA)
-#error ("TFT not support DMA Driver yet!");
-
-#endif
 
 
 #endif

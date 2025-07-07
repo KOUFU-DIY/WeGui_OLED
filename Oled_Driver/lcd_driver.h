@@ -53,18 +53,23 @@ typedef enum lcd_driver_mode//驱动模式
 
 typedef struct oled_boxDriver//高级驱动参数
 {
-	uint8_t x_min;   //限制矩形x最小值
-	uint8_t x_max;   //限制矩形x最大值
-	uint8_t ypage_min;//限制矩形ypage最小值
-	uint8_t ypage_max;//限制矩形ypage最大值
-	uint8_t ypage_min_temp;//最小ypage允许写入的像素点映射(储存计算结果,用于快速运行)
-	uint8_t ypage_max_temp;//最大ypage允许写入的像素点映射(储存计算结果,用于快速运行)
+	uint16_t x_min;   //限制矩形x最小值
+	uint16_t x_max;   //限制矩形x最大值
+	uint16_t ypage_min;//限制矩形ypage最小值
+	uint16_t ypage_max;//限制矩形ypage最大值
+	uint16_t ypage_min_temp;//最小ypage允许写入的像素点映射(储存计算结果,用于快速运行)
+	uint16_t ypage_max_temp;//最大ypage允许写入的像素点映射(储存计算结果,用于快速运行)
 }OledBoxDriver_t;
 
 typedef struct lcd_driver
 {
 	//----------显存----------
+	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	uint8_t LCD_GRAM[GRAM_YPAGE_NUM][SCREEN_WIDTH];
+	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
+	uint8_t LCD_GRAM[GRAM_YPAGE_NUM][SCREEN_WIDTH];
+	uint8_t lcd_refresh_ypage;//记录当前刷屏的是哪一页
+	#endif
 	//--------绘画驱动--------
 	void (*Write_GRAM)(uint16_t x,uint16_t ypage,uint8_t u8_value);//普通写,显示驱动函数
 	void (*Clear_GRAM)(uint16_t x,uint16_t ypage,uint8_t u8_value);//普通清,显示驱动函数
@@ -121,11 +126,11 @@ void lcd_driver_Write_inv_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value);
 void OLED_Set_Driver_Mode(lcd_driver_mode_t mode);
 
 /*--------------------------------------------------------------
-  * 名称: OLED_Set_Driver_Box(uint8_t x_min ,uint8_t y_min ,uint8_t x_max,uint8_t y_max)
+  * 名称: OLED_Set_Driver_Box(uint16_t x_min ,uint16_t y_min ,uint16_t x_max,uint16_t y_max)
   * 传入: (x_min,y_min)起始点 (x_max,y_max)终点
   * 功能: 设置高级驱动的限制区域(Box)
 ----------------------------------------------------------------*/
-void OLED_Set_Driver_Box(uint8_t x_min ,uint8_t y_min ,uint8_t x_max,uint8_t y_max);
+void OLED_Set_Driver_Box(uint16_t x_min ,uint16_t y_min ,uint16_t x_max,uint16_t y_max);
 
 /*--------------------------------------------------------------
   * 名称: OLED_Draw_One_Byte(int16_t x,int16_t y,uint8_t u8_value)

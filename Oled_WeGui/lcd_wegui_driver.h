@@ -110,7 +110,7 @@ typedef struct mPorgram_Propertys
 	void (*begin_fun)();//菜单进入 执行一次
 	void (*loop_fun)(); //菜单功能 持续执行
 	void (*quit_fun)(); //菜单退出 执行一次
-	void (*before_refresh_fun)(); //刷新屏幕前 执行一次
+	void (*refresh_fun)(); //刷新屏幕时执行,放绘图函数
 }mPorgram_Par_t;
 
 //----wCheckBox参数-----

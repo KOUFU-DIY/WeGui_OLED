@@ -235,10 +235,10 @@ static void Reflash_CpuLoad(uint16_t stick)
 
 
 //更新显示系统信息,调试信息,帧率,cpu
-static void Wegui_update_info(uint16_t stick)
+static void Wegui_update_info()
 {
 	//右上角实时显示帧数
-		uint8_t str[8];
+		uint8_t str[10];
 		uint8_t y=0;
 	
 	const fonts_t *i  = lcd_driver.fonts_ASCII;
@@ -259,22 +259,23 @@ static void Wegui_update_info(uint16_t stick)
 //														y++*lcd_driver.fonts_ASCII->high,//y
 //														str);
 		//--------显示CPU---------								
-		str[0]='C';str[1]='P';str[2]='U';str[3]=':';itoa(Wegui.sysInfo.cpu_load,&str[4],10);	
+		str[0]='C';str[1]='P';str[2]='U';str[3]=':';
+		itoa(Wegui.sysInfo.cpu_load,&str[4],10);	
+		//itoa(Wegui.sysInfo.cpu_time,&str[4],10);	
 		OLED_Draw_UTF8_String(  SCREEN_WIDTH - 1 - OLED_Get_UTF8_XLen(str),//x
 														SCREEN_HIGH - 1 - lcd_driver.fonts_ASCII->high - y++*lcd_driver.fonts_ASCII->high,//y
 														str);
 	
+	
+	
 	//--------显示PFS---------								
-		str[0]='F';str[1]='P';str[2]='S';str[3]=':';itoa(Wegui.sysInfo.info_fps,&str[4],10);	
+		str[0]='F';str[1]='P';str[2]='S';str[3]=':';
+		itoa(Wegui.sysInfo.info_fps,&str[4],10);	
 		OLED_Draw_UTF8_String(  SCREEN_WIDTH - 1 - OLED_Get_UTF8_XLen(str),//x
 														SCREEN_HIGH - 1 - lcd_driver.fonts_ASCII->high - y++*lcd_driver.fonts_ASCII->high,//y
 														str);
 	lcd_driver.fonts_ASCII = i;
 	OLED_Set_Driver_Mode(write_1);
-	//更新帧率
-	Reflash_fps(stick);
-	//更新CPU负载百分比
-	Reflash_CpuLoad(stick);
 }
 
 
@@ -284,24 +285,109 @@ void Wegui_loop_func()
 	//两者帧率参数设为一致,获得最佳的视觉和性能体验
 	
 	//可变帧率
-	#define UI_DRAW_TIME_MS        Wegui.setting.ui_fps_ms     //ui绘制速度   0:关闭动画 8ms=100hz 5ms=200hz 4=240hz 3=333hz 2=500hz 1=1000hz
+	#define UI_DRAW_TIME_MS        Wegui.setting.ui_fps_ms     //ui绘制速度   8ms=100hz 5ms=200hz 4=240hz 3=333hz 2=500hz 1=1000hz
 	#define SCREEN_REFRESH_TIME_MS Wegui.setting.screen_fps_ms //屏幕刷新速度 8ms=100hz 5ms=200hz 4=240hz 3=333hz 2=500hz 1=1000hz
 	
 	//固定帧率
 	//#define UI_DRAW_TIME_MS        fps_2_ms(100)  //ui绘制速度   100Hz
 	//#define SCREEN_REFRESH_TIME_MS fps_2_ms(100) //屏幕刷新速度  100Hz
 	
-	
-	uint8_t ui_farmes;
+	static uint16_t ui_time_count  = 0; //ui绘图计时器
+	static uint16_t fps_time_count = 0; //帧率计时器
+	static uint8_t ui_farmes;
+	static uint16_t time_count=0;
 	uint8_t fps_farmes;
-	uint16_t stick;
-	static uint16_t ui_time_count  = 0; 
-	static uint16_t fps_time_count = 0; 
-	
-	stick = Wegui_stick;
+	uint16_t stick = Wegui_stick;
 	Wegui_stick = 0;
 	
 
+
+	
+	ui_time_count  += stick;
+	time_count += stick;
+	
+	if(UI_DRAW_TIME_MS!=0)
+	{
+		ui_farmes  += ui_time_count / UI_DRAW_TIME_MS; 
+		ui_time_count %= UI_DRAW_TIME_MS;
+	}
+	else
+	{
+		ui_farmes  = 255; 
+	}
+	
+	fps_time_count += stick;
+	fps_farmes = fps_time_count / SCREEN_REFRESH_TIME_MS;
+	
+	#if (0) //ui没刷新,禁止屏幕刷新
+	if((LCD_is_Busy()==0)&&(fps_farmes > 0)&&(ui_farmes > 0))
+	{
+	#else  //就算ui没刷新,屏幕也会重新刷一遍(浪费资源)
+	if((LCD_is_Busy()==0)&&(fps_farmes > 0))
+	{
+		//if(ui_farmes > 0)
+	#endif
+		{
+			
+			//------------------屏幕刷新前自定义的操作---------------------
+			m_wDemo_wMessage_ADC_func();//持续刷新显示的ADC值
+			//------------------屏幕刷新前自定义的操作---------------------
+			
+			//OLED_Clear_GRAM();
+			
+			//------------------------开始刷屏--------------------------
+			do
+			{
+				//--------------------绘制对应菜单------------------------
+				switch (Wegui.menu->menuType)
+				{
+					
+					case mPorgram:  //自定义功能APP菜单
+					{
+						if(Wegui.menu->menuPar.mPorgram_Par.refresh_fun != 0x00)
+						{
+							Wegui.menu->menuPar.mPorgram_Par.refresh_fun();
+						}
+					}break;
+					case wCheckBox: //控件:复选框菜单
+						break;
+					case wSlider:   //控件:滑条菜单
+						break;
+					default:
+					case mList:     //列表菜单菜单
+					{
+						OLED_Clear_GRAM();
+						//--------------------绘制菜单------------------------
+						Wegui_show_mList(ui_farmes);
+						//--------------------绘制弹窗------------------------
+						Wegui_show_tip(ui_farmes,time_count);
+						//-------------------绘制调试窗-----------------------
+						Wegui_update_info();
+					}break;
+				}
+				ui_farmes = 0;
+				time_count = 0;
+			}while(LCD_Refresh());
+			
+
+
+			//---刷新调试窗的信息---
+			{
+				static uint16_t i;
+				Wegui.sysInfo.cpu_time = Wegui_stick ;//更新"刷屏一次cpu占用时间"
+				Reflash_CpuLoad(fps_time_count-i);//更新CPU负载百分比
+				Reflash_fps(fps_time_count);//更新帧率
+				Wegui.sysInfo.fps_time = fps_time_count - i; //更新"两次刷屏间隔时间"
+				fps_time_count %= SCREEN_REFRESH_TIME_MS;
+				i = fps_time_count;
+			}
+			
+		}
+
+	}
+
+	
+	
 	//-------------------------菜单的自定义LOOP任务---------------------------
 	switch (Wegui.menu->menuType)
 	{
@@ -327,124 +413,29 @@ void Wegui_loop_func()
 	//-------------------------菜单的LOOP任务---------------------------
 	
 	
-	if(UI_DRAW_TIME_MS!=0)
-	{
-		ui_time_count  += stick;
-		ui_farmes  = ui_time_count / UI_DRAW_TIME_MS; 
-	}
-	else
-	{
-		ui_farmes  = 255; 
-	}
-	
-	fps_time_count += stick;
-	fps_farmes = fps_time_count / SCREEN_REFRESH_TIME_MS;
-	
-	#if (0) //ui没刷新,禁止屏幕刷新
-	if((LCD_is_Busy()==0)&&(fps_farmes > 0)&&(ui_farmes > 0))
-	{
-	#else  //就算ui没刷新,屏幕也会重新刷一遍(浪费资源)
-	if((LCD_is_Busy()==0)&&(fps_farmes > 0))
-	{
-		if(ui_farmes > 0)
-	#endif
-		{
-			//------------------屏幕刷新前自定义的操作---------------------
-			m_wDemo_wMessage_ADC_func();//持续刷新显示的ADC值
-			//------------------屏幕刷新前自定义的操作---------------------
-			
-			//OLED_Clear_GRAM();
-			//------------------------菜单--------------------------
-			switch (Wegui.menu->menuType)
-			{
-				default:
-				
-				case mPorgram:  //自定义功能APP
-				{
-					if(Wegui.menu->menuPar.mPorgram_Par.before_refresh_fun != 0x00)
-					{
-						Wegui.menu->menuPar.mPorgram_Par.before_refresh_fun();
-					}
-				}break;
-				case wCheckBox: //控件:复选框
-					break;
-				case wSlider:   //控件:滑条:
-					break;
-				case mList:     //列表菜单
-				{
-						OLED_Clear_GRAM();
-						if(UI_DRAW_TIME_MS!=0)
-						{
-							ui_farmes  = ui_time_count / UI_DRAW_TIME_MS; 
-							Wegui_show_mList(ui_farmes);
-						}
-						else
-						{
-							Wegui_show_mList(1000);
-						}
-				}break;
-			}
-			//------------------------弹窗--------------------------
-			Wegui_show_tip(ui_farmes,ui_time_count);
-			if(UI_DRAW_TIME_MS!=0)
-			{
-				ui_time_count =  ui_time_count%UI_DRAW_TIME_MS;
-			}
-		}
-		
-		//------------------------调试窗--------------------------
-		Wegui_update_info(fps_time_count);//在LCD_Refresh()前调用,可显示更新系统资源信息
-		//------------------------刷屏--------------------------
-		LCD_Refresh();
-		Wegui.sysInfo.cpu_time = Wegui_stick ;//更新"刷屏一次cpu占用时间"
-		Wegui.sysInfo.fps_time = fps_time_count ; //更新"两次刷屏间隔时间"
-		
-		
-		fps_time_count %= SCREEN_REFRESH_TIME_MS;
-	}
-	
-	
-	
-
-	
 	if(stick>0)
 	{
-		Wegui_Interface_stick(stick);//按键处理 stick传递时间
+		Wegui_Interface_stick(stick);//按键处理 stick传递时间用于计时 (隔执行减少占用)
 	}
-	Wegui_uart_rx_stick(stick);//串口处理 stick传递时间
+	Wegui_uart_rx_stick(stick);//串口处理 stick传递时间用于计时 (需要持续判断放置漏码)
 }
 
 void Wegui_Hello_Word()
 {
-#if defined(LCD_USE_FULL_REFRESH)    //全屏刷新
-	#if defined(LCD_USE_SOFT_3SPI)  //软件三线SPI驱动   
-	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:Soft3SPI\nMode:Full";
-	#elif defined(LCD_USE_SOFT_4SPI)  //软件四线SPI驱动   
-	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:Soft4SPI\nMode:Full";
-	#elif defined(LCD_USE_HARD_4SPI)  //硬件四线SPI驱动   
-	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:Hard4SPI\nMode:Full";
-	#elif defined(LCD_USE_DMA_4SPI)   //DMA四线SPI驱动 
-	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:DMA 4SPI\nMode:Full";
-	#elif defined(LCD_USE_SOFT_IIC)   //软件IIC驱动
-	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:Soft I2C\nMode:Full";
-	#elif defined(LCD_USE_HARD_IIC)   //硬件IIC驱动
-	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:Hard I2C\nMode:Full";
+
+	#if (LCD_PORT == _SOFT_3SPI)  //软件三线SPI驱动   
+	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:Soft3SPI";
+	#elif (LCD_PORT == _SOFT_4SPI)  //软件四线SPI驱动   
+	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:Soft4SPI";
+	#elif (LCD_PORT == _HARD_4SPI)  //硬件四线SPI驱动   
+	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:Hard4SPI";
+	#elif (LCD_PORT == _DMA_4SPI)   //DMA四线SPI驱动 
+	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:DMA 4SPI";
+	#elif (LCD_PORT == _SOFT_IIC)   //软件IIC驱动
+	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:SoftI2C";
+	#elif (LCD_PORT ==_HARD_IIC)   //硬件IIC驱动
+	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:HardI2C";
 	#endif
-#elif defined(LCD_USE_DYNAMIC_REFRESH) //动态刷新(建议使用)
-	#if defined(LCD_USE_SOFT_3SPI)  //软件三线SPI驱动   
-	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:Soft3SPI\nMode:Dynamic";
-	#elif defined(LCD_USE_SOFT_4SPI)  //软件四线SPI驱动   
-	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:Soft4SPI\nMode:Dynamic";
-	#elif defined(LCD_USE_HARD_4SPI)  //硬件四线SPI驱动   
-	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:Hard4SPI\nMode:Dynamic";
-	#elif defined(LCD_USE_DMA_4SPI)   //DMA四线SPI驱动 
-	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:DMA 4SPI\nMode:Dynamic";
-	#elif defined(LCD_USE_SOFT_IIC)   //软件IIC驱动
-	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:SoftI2C\nMode:Dynamic";
-	#elif defined(LCD_USE_HARD_IIC)   //硬件IIC驱动
-	uint8_t* string = (uint8_t*)"Hello WeGui!\nDriver:HardI2C\nMode:Dynamic";
-	#endif
-#endif
 	
 	Wegui_Push_Message_tip(2, string, 3000);//推送提示信息, (推送y位置, 提示内容字符串, 展示时间ms)
 }

@@ -1,6 +1,6 @@
 #include "lcd_Wegui_Config.h"
 
-#ifdef LCD_USE_HARD_IIC
+#if (LCD_PORT == _HARD_IIC)
 
 #include "stdint.h"
 #include "stm32f103_lcd_hard_iic_port.h"
@@ -234,7 +234,7 @@ void LCD_Port_Init(void)
 	I2C_Init(I2C2, &I2C_InitStruct);
 	I2C_Cmd(I2C2, ENABLE);
 	
-	#if defined(LCD_USE_DYNAMIC_REFRESH)
+	#if ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE) || (LCD_MODE ==_PAGE_BUFF_DYNA_UPDATE))
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, ENABLE);
 	#endif
 	
@@ -258,11 +258,11 @@ void LCD_Port_Init(void)
 //----------------------------普通OLED屏幕刷屏接口-------------------------------------
 #if defined (LCD_USE_NORMAL_OLED)
 
-#if defined(LCD_USE_FULL_REFRESH)
-//---------方式1:全屏刷新----------
+#if (LCD_MODE == _FULL_BUFF_FULL_UPDATE)
+//---------方式1:全缓存全屏刷新----------
 //--优点:全屏刷新
 //--缺点:内容不变的区域也参与了刷新
-void LCD_Refresh(void)
+uint8_t LCD_Refresh(void)
 {
 	unsigned char ypage;
 	for(ypage=0;ypage<(SCREEN_HIGH/8);ypage++)
@@ -270,13 +270,12 @@ void LCD_Refresh(void)
 		LCD_Set_Addr(0,ypage);
 		LCD_Send_nDat(&lcd_driver.LCD_GRAM[ypage][0],SCREEN_WIDTH);
 	}
+	return 0;
 }
 
-#elif defined(LCD_USE_DYNAMIC_REFRESH)
-//---------方式2:动态刷新----------
-//--优点:性能好,按需区域刷新,节省MCU资源
-//--缺点:全屏刷新相对变慢
-void LCD_Refresh(void)
+#elif (LCD_MODE == _FULL_BUFF_DYNA_UPDATE)
+//---------方式2:全缓存动态刷新----------
+uint8_t LCD_Refresh(void)
 {
 	//每page做"sum+mini_crc组合"校验,若校验码没变,则不刷新该page
 	static uint32_t sum1[GRAM_YPAGE_NUM];
@@ -309,6 +308,66 @@ void LCD_Refresh(void)
 		}
 		sum1[ypage] = i_sum1;
 	}
+	return 0;
+}
+//---------方式3:页缓存全局刷新----------
+#elif (LCD_MODE == _PAGE_BUFF_FULL_UPDATE)
+
+uint8_t LCD_Refresh(void)
+{
+	uint8_t i=0;
+	
+	for(i=0;i<GRAM_YPAGE_NUM;i++)
+	{
+		LCD_Set_Addr(0,lcd_driver.lcd_refresh_ypage);
+		LCD_Send_nDat(&lcd_driver.LCD_GRAM[i][0],SCREEN_WIDTH);
+		lcd_driver.lcd_refresh_ypage++;
+		if(lcd_driver.lcd_refresh_ypage >= ((SCREEN_HIGH+7)/8))
+		{
+			lcd_driver.lcd_refresh_ypage = 0;
+			break;
+		}
+	}
+	return lcd_driver.lcd_refresh_ypage;
+}
+//---------方式4:页缓存动态刷新----------
+#elif (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE)
+uint8_t LCD_Refresh(void)
+{
+	//每page做校验,若校验码没变,则不刷新该page
+	static uint32_t crc[((SCREEN_HIGH+7)/8)];
+	unsigned char ypage,x;
+
+	for(ypage=0;ypage<GRAM_YPAGE_NUM;ypage++)
+	{
+		uint32_t i_crc;
+
+		//-----方式1:CRC算法校验-----
+		CRC->CR = CRC_CR_RESET;//CRC_ResetDR();
+		for(x=0;x<SCREEN_WIDTH;x++)
+		{
+			CRC->DR = lcd_driver.LCD_GRAM[ypage][x];//CRC_CalcCRC(lcd_driver.LCD_GRAM[ypage][x]);
+		}
+		i_crc = CRC->DR;//i_sum1 = CRC_GetCRC();
+		//---------------------------
+
+		if(crc[lcd_driver.lcd_refresh_ypage + ypage] != i_crc)
+		{
+			if(crc[lcd_driver.lcd_refresh_ypage + ypage] != i_crc)
+			{
+				LCD_Set_Addr(0,lcd_driver.lcd_refresh_ypage + ypage);
+				LCD_Send_nDat(&lcd_driver.LCD_GRAM[ypage][0],SCREEN_WIDTH);
+			}
+			crc[lcd_driver.lcd_refresh_ypage + ypage] = i_crc;
+		}
+	}
+	
+	lcd_driver.lcd_refresh_ypage += GRAM_YPAGE_NUM;
+	if(lcd_driver.lcd_refresh_ypage >= ((SCREEN_HIGH+7)/8))
+	{
+		lcd_driver.lcd_refresh_ypage = 0;
+	}
+	return lcd_driver.lcd_refresh_ypage;
 }
 #endif
 
@@ -320,7 +379,7 @@ void LCD_Refresh(void)
 	//灰度OLED暂不支持硬件IIC 请使用软件IIC(存在硬件问题暂未解决)
 	#error("Gray OLED not support hard_iic driver yet! Use soft_iic please!")
 	
-//#if defined(LCD_USE_FULL_REFRESH)
+//#if (LCD_MODE == _FULL_BUFF_FULL_UPDATE)
 ////---------方式1:全屏刷新----------
 ////--优点:全屏刷新
 ////--缺点:内容不变的区域也参与了刷新
@@ -395,7 +454,7 @@ void LCD_Refresh(void)
 //	#endif
 //	LCD_I2C_Stop();
 //}
-//#elif defined(LCD_USE_DYNAMIC_REFRESH)
+//#elif (LCD_MODE == _FULL_BUFF_DYNA_UPDATE)
 ////---------方式2:动态刷新----------
 ////--优点:性能好,按需区域刷新,节省MCU资源
 ////--缺点:全屏刷新相对变慢

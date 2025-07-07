@@ -19,7 +19,7 @@ typedef struct mList_par
 	int16_t cursor_box_x1;          //光标矩形目标位置x1
 	int16_t cursor_box_y1;          //光标矩形目标位置y1
 	
-	uint8_t scroll_bar_len;         //滚动条长度
+	uint16_t scroll_bar_len;         //滚动条长度
 	uint16_t scrool_timer;          //计时用,倒计到隐藏滚动条
 	int16_t scroll_y_offset_save;   //用于检测有无滚动页面,储存list_y_offset_cur,
 	

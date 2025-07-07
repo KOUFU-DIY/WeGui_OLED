@@ -78,7 +78,7 @@ void LCD_Send_1Dat(uint8_t dat);//向屏幕发送1个数据
 void LCD_Send_nDat(uint8_t *p,uint16_t num);//向屏幕发送num个数据
 void LCD_Send_nCmd(uint8_t *p,uint16_t num);//向屏幕发送num个命令
 void LCD_Port_Init(void);//接口初始化	
-void LCD_Refresh(void);
+uint8_t LCD_Refresh(void);
 
 
 #endif

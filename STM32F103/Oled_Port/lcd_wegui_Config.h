@@ -3,18 +3,18 @@
 
 
 /*--------------------------------------------------------------
-  * Wegui : V0.3beta
+  * Wegui : V0.4beta
   * Author: KOUFU
 	* https://space.bilibili.com/526926544
 	* https://github.com/KOUFU-DIY/Wegui_OLED
 ----------------------------------------------------------------*/
 /*--------------------------------------------------------------
-  * 版本更新 : V0.3beta
-	* 1.修复多余2page的ram占用
-	* 2.修复缺少ssd1309驱动文件的问题
-  * 3.1.升级配套WeGui上位机,对应文件stm32f103_wegui_uart_port.c
-	* 3.2.增加uart电脑"录屏串流"功能, 使用上位机进行串流(串流时调试信息FPS不准确)
-	* 3.3.上位机支持模拟按键操作
+  * 版本更新 : V0.4beta
+	* 1.增加自定义显存工作模式, 大幅减少大屏得RAM占用
+	* 2.修复在优化等级高的时候容易出现的刷屏错位问题
+  * 3.修复bitmap刷图函数不能刷大图的问题
+	* 4.上位机更新显示内存
+	* 5.主函数里增加了简易图形demo,可自行打开测试
 ----------------------------------------------------------------*/
 
 /*--------------------------------------------------------------
@@ -32,14 +32,18 @@
 //IIC硬件在一次通讯失败后,将拖慢系统运行,暂未解决, 推荐使用软件IIC方式!!
 //软件IIC默认使用适中的延迟速率,需要更快的刷新速度,需要到对应port文件里修改, 查找I2C_SCL_Rise_Delay等并进行修改延迟值
 //使用模拟IIC可精确控制上升和下降时间,调整合适的延迟时间,刷新率可以比硬件IIC更快
+//若出现图形撕裂或者位置显示不正确, 可尝试降低优化等级测试, 也可反馈后续版本更新解决
 
-//该工程支持"全屏刷新"和"动态刷新"两种刷屏方式(DMA方式强制使用全屏刷新)
+//该工程支持四种工作模式, 内存重组情况下建议使用(2), 内存不足建议使用(4), 工作方式在下方通过宏定义调整切换
+//(1)"全缓存全屏刷新",最原始的刷新模式
+//(2)"全缓存动态刷新",最快的刷新模式,全屏动画时与(1)的刷屏速度基本一致
+//(3)"页缓存全屏刷新",节省内存的刷新模式
+//(4)"页缓存动态刷新",节省内存且刷得快得模式, 全屏动画时与(3)的刷屏速度基本一致
 
-//"动态刷新"以牺牲一些全屏刷新速度换取普通刷新的速度, 但同时在屏幕静止时, cpu占用极低
-//刷新方式在下方通过宏定义调整切换
 
-//默认开启右下角调试状态显示,若要关闭,查找注释掉调用的Wegui_update_info(fps_time_count);
-//字库及其他资源在lcd_res,可自行使用配套工具修改裁剪多国语言字库, 随后会更新视频教程
+//默认开启右下角调试状态显示,若要关闭,查找注释掉调用的 Wegui_update_info();
+//字库及其他资源在lcd_res,可自行使用配套工具修改裁剪多国语言字库
+
 
 /*------------------------------------------------------------------------------------
 	* ----默认驱动接口----        ---默认按键接口---          外接ADC电位器接口 A1
@@ -47,11 +51,11 @@
 	* |BL   B0|  |RES  A6|       |BACK | C15 |返回|          
 	* |CS   A6|  |SDA B11|       |UP   | B13 | 上 |         板载闪烁LED  C13
 	* |DC  B11|  |SCL B10|       |DOWN | B14 | 下 |    
-	* |RES B10|  |3V3 3V3|       |LEFT | B15 | 左 |    
-	* |SDA  A7|  |GND GND|       |RIGHT| B12 | 右 |    
+	* |RES B10|  |3V3 3V3|       |LEFT | B15 | 左 |         UART_RX  A3 
+	* |SDA  A7|  |GND GND|       |RIGHT| B12 | 右 |         UART_TX  A2
 	* |SCL  A5|                                       
 	* |3V3 3V3|  
-  * |GND GND|
+	* |GND GND|
 -------------------------------------------------------------------------------------*/
 
 
@@ -61,42 +65,56 @@
 
 //-------------------------1.选择一个屏幕通讯接口-----------------------------
 
-//#define LCD_USE_SOFT_3SPI  //软件三线SPI驱动   对应文件stm32f103_lcd_soft_3spi_port.c
-//#define LCD_USE_SOFT_4SPI  //软件四线SPI驱动   对应文件stm32f103_lcd_soft_4spi_port.c
-//#define LCD_USE_HARD_4SPI  //硬件四线SPI驱动   对应文件stm32f103_lcd_hard_4spi_port.c
-//#define LCD_USE_DMA_4SPI   //DMA四线SPI驱动   对应文件stm32f103_lcd_dma_4spi_port.c(暂不支持动态刷新)
-#define LCD_USE_SOFT_IIC   //软件IIC驱动(推荐) 对应文件stm32f103_lcd_soft_iic_port.c 
-//#define LCD_USE_HARD_IIC   //硬件IIC驱动(不推荐) 对应文件stm32f103_lcd_hard_iic_port.c (不推荐使用,应答等存在问题暂未解决)
-
+#define _SOFT_3SPI  (0)//软件三线SPI驱动   对应文件stm32f103_lcd_soft_3spi_port.c
+#define _SOFT_4SPI  (1)//软件四线SPI驱动   对应文件stm32f103_lcd_soft_4spi_port.c
+#define _HARD_4SPI  (2)//硬件四线SPI驱动   对应文件stm32f103_lcd_hard_4spi_port.c
+#define _DMA_4SPI   (3)//DMA四线SPI驱动   对应文件stm32f103_lcd_dma_4spi_port.c(暂不支持动态刷新)
+#define _SOFT_IIC   (4)//软件IIC驱动(推荐) 对应文件stm32f103_lcd_soft_iic_port.c 
+#define _HARD_IIC   (5)//硬件IIC驱动(不推荐) 对应文件stm32f103_lcd_hard_iic_port.c (应答等存在问题暂未解决)
+#define LCD_PORT    _SOFT_IIC//选择一个接口
 
 
 
 
 //---------------------------2.1设定屏幕IIC地址--------------------------------
 
-#if defined(LCD_USE_HARD_IIC) || defined(LCD_USE_SOFT_IIC) || defined(LCD_USE_DMA_IIC)
+#if ((LCD_PORT == _HARD_IIC) || (LCD_PORT == _SOFT_IIC))
 	#define OLED_IIC_7ADDR 0x3C //7位0x3C => 8位0x78 (大部分默认)
 	//#define OLED_IIC_7ADDR 0x3D //7位0x3D => 8位0x7A
-	 
 #endif 
 
 //-------------------------2.2设定硬件SPI时钟速率-------------------------------
 
-#if defined(LCD_USE_HARD_4SPI) || defined(LCD_USE_DMA_4SPI)
+#if ((LCD_PORT == _HARD_4SPI) || (LCD_PORT == _DMA_4SPI))
 //STM32F103手册指定SPI最高设置18MHz 但也支持超频
 #define RCC_HCLK_Divx            RCC_HCLK_Div2 //HCLK时钟分频1,2,4,8,16
 #define SPI_BaudRatePrescaler_x  SPI_BaudRatePrescaler_8 //SPI分频2,4,8,16,32,64,128,256
 #endif
 
 
-//----------------------------3.选择刷屏方式--------------------------------
-//#define LCD_USE_FULL_REFRESH    //全屏刷新
-#define LCD_USE_DYNAMIC_REFRESH //动态刷新(建议使用)
+//---------------------------3.1.选择刷屏方式--------------------------------
+#define _FULL_BUFF_FULL_UPDATE (0) //全屏缓存 全屏刷新
+#define _FULL_BUFF_DYNA_UPDATE (1) //全屏缓存 动态刷新(更高的刷新速度)(优先使用)
+#define _PAGE_BUFF_FULL_UPDATE (2) //页缓存 全屏刷新(更低的内存占用)[暂不支持上位机串流和截屏]
+#define _PAGE_BUFF_DYNA_UPDATE (3) //页缓存 动态刷新(更低的内存占用,建议使用)[暂不支持上位机串流和截屏]
+
+#define LCD_MODE    _FULL_BUFF_DYNA_UPDATE //选择一个刷屏模式
+
+//-------------------------3.2.选择刷屏缓存页大小--------------------------------
+//仅页缓存模式需要设置
+#if ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))
+	#define GRAM_YPAGE_NUM (1)//自定义 最小取1 最大取(((SCREEN_HIGH+7)/8))
+	//#define GRAM_YPAGE_NUM ((((SCREEN_HIGH+7)/8)+1)/2)//设置二分之一屏缓存
+	//#define GRAM_YPAGE_NUM ((((SCREEN_HIGH+7)/8)+3)/4)//设置四分之一屏缓存
+	//#define GRAM_YPAGE_NUM ((((SCREEN_HIGH+7)/8)+7)/8)//设置八分之一屏缓存
+	//#define GRAM_YPAGE_NUM (((SCREEN_HIGH+7)/8))//设置全屏缓存(请直接使用_FULL_BUFF_xxxx_UPDATE模式获取更高的性能)
+#endif
+
 
 
 //----------------------------4.设定屏幕分辨率--------------------------------
-#define SCREEN_WIDTH 128  //建议取8或2的倍数
-#define SCREEN_HIGH  64  //建议取8或2的倍数
+#define SCREEN_WIDTH 128  //建议取8的倍数
+#define SCREEN_HIGH  64  //建议取8的倍数
 
 
 //-----------------------5.设定屏幕区域显示偏移设置--------------------------
@@ -129,12 +147,17 @@
 #define LCD_DRAW_COLOUR  RGB565_White //画笔色
 #define LCD_CLEAR_COLOUR RGB565_Black //背景色
 
+#define LCD_DRAW_COLOUR  RGB565_White //画笔色
+#define LCD_CLEAR_COLOUR RGB565_Black //背景色
+
 //---------------------------7.2设定灰度屏--------------------------------
 //仅"灰度OLED屏"需要设置
 
+//注意目前驱动限制,屏幕宽高须为8的倍数,否则屏幕可能会有溢出
+
 //1.选择一个灰度屏扫描方向[需要与初始化(A0指令)匹配]
-#define GRAY_DRIVER_0DEG  //方向1
-//#define GRAY_DRIVER_90DEG //方向2
+//#define GRAY_DRIVER_0DEG  //方向1
+#define GRAY_DRIVER_90DEG //方向2
 
 //2.设置画笔灰度亮度[1:15]
 #define GRAY_COLOUR  15 //画笔灰度(亮度)
@@ -160,8 +183,19 @@
  
 
 //------------编译-----------
-#define GRAM_YPAGE_NUM ((SCREEN_HIGH+7)/8)
 
+//全屏缓存,固定大小
+#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || (LCD_MODE == _FULL_BUFF_DYNA_UPDATE)) 
+	#define GRAM_YPAGE_NUM ((SCREEN_HIGH+7)/8)
+#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))
+	#if (GRAM_YPAGE_NUM >= ((SCREEN_HIGH+7)/8))
+		#undef GRAM_YPAGE_NUM
+		#define GRAM_YPAGE_NUM ((SCREEN_HIGH+7)/8)
+		#undef LCD_MODE
+		#define LCD_MODE _FULL_BUFF_FULL_UPDATE
+		#warning("Buff enough. Use _FULL_BUFF_FULL_UPDATE mode now!")
+	#endif
+#endif
 
 #if (LCD_IC == _SH1106)
 	#include "sh1106.h"
@@ -269,19 +303,19 @@
 #endif
 
 
-#if defined LCD_USE_SOFT_3SPI    //软件三线SPI 
+#if (LCD_PORT == _SOFT_3SPI)    //软件三线SPI
 	#include "stm32f103_lcd_soft_3spi_port.h"
-#elif defined LCD_USE_SOFT_4SPI //软件四线SPI 
+#elif (LCD_PORT == _SOFT_4SPI) //软件四线SPI 
 	#include "stm32f103_lcd_soft_4spi_port.h"
-#elif defined LCD_USE_HARD_4SPI //硬件四线SPI 
+#elif (LCD_PORT == _HARD_4SPI) //硬件四线SPI 
 	#include "stm32f103_lcd_hard_4spi_port.h"
-#elif defined LCD_USE_DMA_4SPI //DMA四线SPI 
+#elif (LCD_PORT == _DMA_4SPI) //DMA四线SPI 
 	#include "stm32f103_lcd_dma_4spi_port.h"
-#elif defined LCD_USE_SOFT_IIC  //软件IIC   
+#elif (LCD_PORT == _SOFT_IIC)  //软件IIC   
 	#include "stm32f103_lcd_soft_iic_port.h"
-#elif defined LCD_USE_HARD_IIC  //硬件IIC    
+#elif (LCD_PORT == _HARD_IIC)  //硬件IIC    
 	#include "stm32f103_lcd_hard_iic_port.h"
-#elif defined LCD_USE_DMA_IIC  //DMA_IIC驱动 (暂不支持)
+#elif (LCD_PORT == _DMA_IIC)  //DMA_IIC驱动 (暂不支持)
 	//#include "stm32f103_oled_dma_iic_port.h"
 	#error ("stm32f103 dma iic driver is not supported!")
 #endif

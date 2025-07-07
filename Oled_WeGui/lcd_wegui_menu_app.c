@@ -25,7 +25,7 @@ void Uart_Screen_App_Quit()//退出菜单执行一次
 	
 }
 
-void Uart_Screen_Before_Refresh()//刷新屏幕前执行一次
+void Uart_Screen_Refresh()//刷新屏幕时执行,放绘图函数
 {
 
 }

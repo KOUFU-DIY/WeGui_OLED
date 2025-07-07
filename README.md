@@ -1,3 +1,19 @@
+V0.3Beta
+1.增加uart通讯, 支持上位机控制
+
+2.完善支持"uart显示器"串流功能, 需要配套上位机操作
+
+3.修复SSD1309文件缺失的问题
+
+4.修复多余的2*page的ram占用
+
+5.修复部分函数的命名
+
+![image](https://github.com/user-attachments/assets/a7d5636f-9a00-45cd-a749-4cebd8be4028)
+
+![image](https://github.com/user-attachments/assets/ea3cf4f9-7a3e-449a-a361-35b8de33a7cc)
+
+
 V0.2Beta
 
 1.增加更多的OLED兼容型号

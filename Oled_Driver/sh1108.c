@@ -51,12 +51,12 @@ void SH1108_Set_Address_ypage(unsigned char page)
 void SH1108_Set_Address_x_ypage(unsigned char x,unsigned char page)
 {
 	//方式1:单字节发送
-	//SH1108_Set_Address_x(x);
-	//SH1108_Set_Address_ypage(page);
+	SH1108_Set_Address_x(x);
+	SH1108_Set_Address_ypage(page);
 	
-	//方式2:连续发送
-	uint8_t i[]={((x>>4) | 0x10),(x&0x0f),0xb0,page};
-	LCD_Send_nCmd(i,4);
+	//方式2:连续发送(优化等级开高了可能有问题)
+	//uint8_t i[]={((x>>4) | 0x10),(x&0x0f),0xb0,page};
+	//LCD_Send_nCmd(i,4);
 }
 
 
@@ -76,8 +76,8 @@ void SH1108_Clear()
 		SH1108_Set_Address_x(0);
 		for(x=0;x<160;x++)
 		{
-			//LCD_Send_1Dat(0x00);
-			LCD_Send_1Dat(0xff);
+			LCD_Send_1Dat(0x00);
+			//LCD_Send_1Dat(0xff);
 		}
 	}
 }
@@ -177,12 +177,10 @@ void SH1108_Init(void)
 			//设定VSL [0:15] 默认0	
 			SH1108_Discharge_VSL(0);
 			
-
 			
 			//清屏
 			SH1108_Clear();
 				
 				LCD_delay_ms(200);
 			SH1108_Display_On();	
-
 }

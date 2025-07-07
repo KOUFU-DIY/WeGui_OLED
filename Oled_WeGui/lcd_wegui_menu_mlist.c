@@ -49,23 +49,28 @@ void Wegui_show_mList(uint16_t farmes)
 	menu_t* p;
 
 	
+	
 	//---------------------------------------1.菜单-------------------------------------------------
 	
-	//使用P(PID)的方式,使当前值接近目标值 
-	//(cur_value:当前变量, target_value目标值, P:[0快:16慢], count:连续处理count次)
-	//Value_Change_PID_P(cur_value,target_value,P,count)
-	Value_Change_PID_P( mList_par.list_animation_temp_y,
-	                    (SCREEN_HIGH-1+SCREEN_HIGH/8),
-	                    //(3),
-											(SCREEN_HIGH/50+1),
-	                    farmes);
-	
-	
-	
-	Value_Change_PID_P( mList_par.list_y_offset_cur,
-	                    mList_par.list_y_offset_target,
-	                    2,
-	                    farmes);
+	if(farmes != 0)
+	{
+		//使用P(PID)的方式,使当前值接近目标值 
+		//(cur_value:当前变量, target_value目标值, P:[0快:16慢], count:连续处理count次)
+		//Value_Change_PID_P(cur_value,target_value,P,count)
+		Value_Change_PID_P( mList_par.list_animation_temp_y,
+												(SCREEN_HIGH-1+SCREEN_HIGH/8),
+												(4),
+		                    //(13 - SCREEN_HIGH/36+1),//控制菜单下拉速度[1最快:16最慢]
+												farmes);
+		
+		
+		
+		Value_Change_PID_P( mList_par.list_y_offset_cur,
+												mList_par.list_y_offset_target,
+												2,
+												farmes);
+	}
+
 	
 	uint8_t id_min=(mList_par.list_y_offset_cur + mList_par.list_y_scape-mList_par.list_font_high)/mList_par.list_y_scape;
 	
@@ -215,36 +220,38 @@ void Wegui_show_mList(uint16_t farmes)
 	}
 	
 	
-	
-	//----------------光标矩形两点移动----------------
-	//使用P(PID)的方式,使当前值接近目标值 
-	//(cur_value:当前变量, target_value目标值, P:[0快:16慢], count:连续处理count次)
-	//Value_Change_PID_P(cur_value,target_value,P,count)
-	Value_Change_PID_P( (mList_par.cursor_box_x0),
-	                    (curr_target_x0),
-											(3),
-											(farmes));
-
-											
-	Value_Change_PID_P( mList_par.cursor_box_y0,
-	                    (curr_target_y0),
-											(2),
-											//(SCREEN_HIGH/64+1),
-											(farmes));
-	if(mList_par.cursor_box_y0 > mList_par.list_animation_temp_y)//防止光标比菜单下滑还要快
+	if(farmes != 0)
 	{
-		mList_par.cursor_box_y0 = mList_par.list_animation_temp_y;
+		//----------------光标矩形两点移动----------------
+		//使用P(PID)的方式,使当前值接近目标值 
+		//(cur_value:当前变量, target_value目标值, P:[0快:16慢], count:连续处理count次)
+		//Value_Change_PID_P(cur_value,target_value,P,count)
+		Value_Change_PID_P( (mList_par.cursor_box_x0),
+												(curr_target_x0),
+												(3),
+												(farmes));
+	
+												
+		Value_Change_PID_P( mList_par.cursor_box_y0,
+												(curr_target_y0),
+												(2),
+												//(SCREEN_HIGH/64+1),
+												(farmes));
+		if(mList_par.cursor_box_y0 > mList_par.list_animation_temp_y)//防止光标比菜单下滑还要快
+		{
+			mList_par.cursor_box_y0 = mList_par.list_animation_temp_y;
+		}
+												
+		Value_Change_PID_P( (mList_par.cursor_box_x1),
+												(curr_target_x0+(OLED_Get_UTF8_XLen((uint8_t*)string))),
+												(1),
+												(farmes));
+												
+//		Value_Change_PID_P( mList_par.cursor_box_y1,
+//		                    curr_target_y0+mList_par.list_font_high,
+//		                    2,
+//		                    farmes);
 	}
-											
-	Value_Change_PID_P( (mList_par.cursor_box_x1),
-	                    (curr_target_x0+(OLED_Get_UTF8_XLen((uint8_t*)string))),
-	                    (1),
-	                    (farmes));
-											
-//	Value_Change_PID_P( mList_par.cursor_box_y1,
-//	                    curr_target_y0+mList_par.list_font_high,
-//	                    2,
-//	                    farmes);
 	
 	OLED_Set_Driver_Mode(write_inverse);
 	OLED_Fill_RBox( mList_par.cursor_box_x0-CURSOR_X_LOW_LEN,
@@ -266,7 +273,7 @@ void Wegui_show_mList(uint16_t farmes)
 		//scroll_bar_pos=0;
 	}
 	uint8_t id_max=0;
-	uint8_t scroll_bar_len_y0;
+	uint16_t scroll_bar_len_y0;
 	uint32_t temp;//菜单下拉总行程
 	
 	
