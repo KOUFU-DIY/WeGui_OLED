@@ -1,4 +1,20 @@
-#include "lcd_Wegui_Config.h"
+/*
+	Copyright 2025 Lu Zhihao
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+#include "lcd_wegui_Config.h"
 
 #if (LCD_PORT == _SOFT_4SPI)
 
@@ -341,7 +357,7 @@ uint8_t LCD_Refresh(void)
 
 uint8_t LCD_Refresh(void)
 {
-	uint8_t i=0;
+	uint8_t i;
 	
 	for(i=0;i<GRAM_YPAGE_NUM;i++)
 	{
@@ -368,6 +384,11 @@ uint8_t LCD_Refresh(void)
 	{
 		uint32_t i_crc;
 
+		//判断屏幕是否已刷完
+		if(lcd_driver.lcd_refresh_ypage + ypage > ((SCREEN_HIGH+7)/8)-1)
+		{
+			break;
+		}
 		//-----方式1:CRC算法校验-----
 		CRC->CR = CRC_CR_RESET;//CRC_ResetDR();
 		for(x=0;x<SCREEN_WIDTH;x++)
@@ -376,16 +397,13 @@ uint8_t LCD_Refresh(void)
 		}
 		i_crc = CRC->DR;//i_sum1 = CRC_GetCRC();
 		//---------------------------
-
 		if(crc[lcd_driver.lcd_refresh_ypage + ypage] != i_crc)
 		{
-			if(crc[lcd_driver.lcd_refresh_ypage + ypage] != i_crc)
-			{
-				LCD_Set_Addr(0,lcd_driver.lcd_refresh_ypage + ypage);
-				LCD_Send_nDat(&lcd_driver.LCD_GRAM[ypage][0],SCREEN_WIDTH);
-			}
+			LCD_Set_Addr(0,lcd_driver.lcd_refresh_ypage + ypage);
+			LCD_Send_nDat(&lcd_driver.LCD_GRAM[ypage][0],SCREEN_WIDTH);
 			crc[lcd_driver.lcd_refresh_ypage + ypage] = i_crc;
 		}
+		
 	}
 	
 	lcd_driver.lcd_refresh_ypage += GRAM_YPAGE_NUM;
