@@ -1,12 +1,29 @@
-#ifndef LCD_Wegui_CONFIG_H
-#define LCD_Wegui_CONFIG_H
+/*
+	Copyright 2025 Lu Zhihao
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+
+#ifndef LCD_WEGUI_CONFIG_H
+#define LCD_WEGUI_CONFIG_H
 
 
 /*--------------------------------------------------------------
   * Wegui : V0.4beta
   * Author: KOUFU
 	* https://space.bilibili.com/526926544
-	* https://github.com/KOUFU-DIY/Wegui_OLED
+	* https://github.com/KOUFU-DIY/WeGui_OLED
 ----------------------------------------------------------------*/
 /*--------------------------------------------------------------
   * 版本更新 : V0.4beta
@@ -71,7 +88,7 @@
 #define _DMA_4SPI   (3)//DMA四线SPI驱动   对应文件stm32f103_lcd_dma_4spi_port.c(暂不支持动态刷新)
 #define _SOFT_IIC   (4)//软件IIC驱动(推荐) 对应文件stm32f103_lcd_soft_iic_port.c 
 #define _HARD_IIC   (5)//硬件IIC驱动(不推荐) 对应文件stm32f103_lcd_hard_iic_port.c (应答等存在问题暂未解决)
-#define LCD_PORT    _SOFT_IIC//选择一个接口
+#define LCD_PORT    _HARD_IIC//选择一个接口
 
 
 
@@ -88,7 +105,7 @@
 #if ((LCD_PORT == _HARD_4SPI) || (LCD_PORT == _DMA_4SPI))
 //STM32F103手册指定SPI最高设置18MHz 但也支持超频
 #define RCC_HCLK_Divx            RCC_HCLK_Div2 //HCLK时钟分频1,2,4,8,16
-#define SPI_BaudRatePrescaler_x  SPI_BaudRatePrescaler_8 //SPI分频2,4,8,16,32,64,128,256
+#define SPI_BaudRatePrescaler_x  SPI_BaudRatePrescaler_2 //SPI分频2,4,8,16,32,64,128,256
 #endif
 
 
@@ -144,11 +161,11 @@
 
 //----------------------------7.1设定彩屏---------------------------------
 //仅"TFT彩屏"需要设置
-#define LCD_DRAW_COLOUR  RGB565_White //画笔色
-#define LCD_CLEAR_COLOUR RGB565_Black //背景色
+//#define LCD_DRAW_COLOUR  RGB565_White //画笔色
+//#define LCD_CLEAR_COLOUR RGB565_Black //背景色
 
 #define LCD_DRAW_COLOUR  RGB565_White //画笔色
-#define LCD_CLEAR_COLOUR RGB565_Black //背景色
+#define LCD_CLEAR_COLOUR RGB565_DarkRed //背景色
 
 //---------------------------7.2设定灰度屏--------------------------------
 //仅"灰度OLED屏"需要设置
@@ -164,15 +181,16 @@
 
 
 //--------------------------6.选择一个GUI菜单交互方式-----------------------------
-//#define Wegui_USE_NONE_PORT //无交互
-//#define Wegui_USE_6KEY_PORT //6按键交互模式 "上","下","左","右","OK","BACK"
-#define Wegui_USE_4KEY_PORT //4按键交互模式 "上","下","左","右"
-//#define Wegui_USE_2KEY_PORT //(暂未适配)2按键交互模式 "BACK","OK"
-//#define Wegui_USE_EC_PORT //(暂未适配)旋转编码器
+//#define WEGUI_USE_NONE_PORT //无交互
+//#define WEGUI_USE_6KEY_PORT //6按键交互模式 "上","下","左","右","OK","BACK"
+#define WEGUI_USE_4KEY_PORT //4按键交互模式 "上","下","左","右"
+//#define WEGUI_USE_2KEY_PORT //(暂未适配)2按键交互模式 "BACK","OK"
+//#define WEGUI_USE_EC_PORT //(暂未适配)旋转编码器
 
 //--------------------------7.启用UART(上位机功能)-----------------------------
-//#define Wegui_UART_OFF //关闭
-#define Wegui_UART_ON //启用
+#define WEGUI_UART_ON //启用
+//#define WEGUI_UART_OFF //关闭
+
 
 
 
@@ -324,32 +342,24 @@
 
 
 
-#if defined Wegui_USE_6KEY_PORT    //6键交互模式
-	#include "stm32f103_Wegui_6key_port.h"
+#if defined WEGUI_USE_6KEY_PORT    //6键交互模式
+	#include "stm32f103_wegui_6key_port.h"
 	#define Wegui_Interface_port_Init() do{Wegui_6key_port_Init();Wegui_Uart_Port_Init();}while(0)
-#elif defined Wegui_USE_4KEY_PORT    //4键交互模式
-	#include "stm32f103_Wegui_4key_port.h"
+#elif defined WEGUI_USE_4KEY_PORT    //4键交互模式
+	#include "stm32f103_wegui_4key_port.h"
 	#define Wegui_Interface_port_Init() do{Wegui_4key_port_Init();Wegui_Uart_Port_Init();}while(0)
-#elif defined Wegui_USE_NONE_PORT
+#elif defined WEGUI_USE_NONE_PORT
 	#define Wegui_Interface_port_Init() do{}while(0)
 	#define Wegui_Interface_stick(x) do{}while(0)
 #endif
 		
-	
-	
-	
 
-
-#if defined Wegui_UART_ON
-	#include "stm32f103_Wegui_uart_port.h"
+#if defined WEGUI_UART_ON
+	#include "stm32f103_wegui_uart_port.h"
 #else //defined Wegui_UART_OFF
 	#define Wegui_Uart_Port_Init() do{}while(0) //防止编译错误
 	#define Wegui_uart_rx_stick(stick) do{}while(0) //防止编译错误
 #endif
-	
-
-	
-	
 	
 	
 #include "lcd_wegui_menu_app.h"

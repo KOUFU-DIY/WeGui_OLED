@@ -1,11 +1,24 @@
+/*
+	Copyright 2025 Lu Zhihao
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 #ifndef _LCD_Wegui_TIP_H_
 #define _LCD_Wegui_TIP_H_
 
 
-#include "lcd_Wegui_driver.h"
-
-
-
+#include "lcd_wegui_driver.h"
 
 
 void Wegui_show_tip(uint16_t farmes, uint16_t Tms);
@@ -27,9 +40,6 @@ void Wegui_Tip_Save_andQuit(void);
   * 功能: 像Wegui屏幕推送一条消息
 ----------------------------------------------------------------*/
 void Wegui_Push_Message_tip(int16_t y, uint8_t* string, uint16_t time);//(推送y位置,推送字符串,推送显示时间)
-
-
-
 
 /*--------------------------------------------------------------
   * 名称: Wegui_Push_Slider_tip(int16_t y, uint8_t* string, int16_t *p_value,int16_t value_min ,uint16_t value_max,value_change_t change_way,void(*Change_func)(),void(*Finish_func)())

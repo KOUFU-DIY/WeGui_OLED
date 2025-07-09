@@ -1,12 +1,27 @@
+/*
+	Copyright 2025 Lu Zhihao
 
-#include "lcd_Wegui_Config.h"
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-#if defined(Wegui_USE_4KEY_PORT)
+    http://www.apache.org/licenses/LICENSE-2.0
 
-#include "stm32f103_Wegui_4key_port.h"
-#include "user_Wegui_menu.h"
-#include "lcd_Wegui_menu_mlist.h"
-#include "lcd_Wegui_tip.h"
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+#include "lcd_wegui_Config.h"
+
+#if defined(WEGUI_USE_4KEY_PORT)
+
+#include "stm32f103_wegui_4key_port.h"
+#include "user_wegui_menu.h"
+#include "lcd_wegui_menu_mlist.h"
+#include "lcd_wegui_tip.h"
 
 
 //-------------------------------------按键结构体-------------------------------------

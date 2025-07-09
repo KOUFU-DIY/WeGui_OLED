@@ -1,3 +1,26 @@
+/*!
+    \file    lcd_driver.c
+    \brief   OLED driver
+
+    \version 2025-07-10, V0.4
+*/
+
+/*
+	Copyright 2025 Lu Zhihao
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 #include <string.h>
 #include "lcd_driver.h"
 
@@ -10,28 +33,11 @@ const static uint8_t cal_1[] = {0x00,0x01,0x03,0x07,0x0F,0x1F,0x3F,0x7F,0xFF};//
 
 
 
-
-
-/*--------------------------------------------------------------
-  * 名称: LCD_Refresh(void)
-  * 功能: 驱动接口,将显存LCD_GRAM全部内容发送至屏幕
-----------------------------------------------------------------*/
-//该函数, 已转移到对应的port接口驱动代码中
-//stm32f103_lcd_soft_3spi_port.c
-//stm32f103_lcd_soft_4spi_port.c
-//stm32f103_lcd_hard_4spi_port.c
-//stm32f103_lcd_dma_4spi_port.c
-//stm32f103_lcd_soft_iic_port.c
-//stm32f103_lcd_hard_iic_port.c
-
-
-
-
 /*--------------------------------------------------------------
   * 名称: lcd_driver_Write_0(uint16_t x,uint16_t ypage,uint8_t u8_value)
   * 功能: 普通快速驱动函数,将值以清0的方式写入显存
 ----------------------------------------------------------------*/
-void lcd_driver_Write_0(uint16_t x,uint16_t ypage,uint8_t u8_value)
+static void lcd_driver_Write_0(uint16_t x,uint16_t ypage,uint8_t u8_value)
 {
 	//---------全屏缓存-----------
 	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
@@ -49,7 +55,7 @@ void lcd_driver_Write_0(uint16_t x,uint16_t ypage,uint8_t u8_value)
   * 名称: lcd_driver_Write_1(uint16_t x,uint16_t ypage,uint8_t u8_value)
   * 功能: 普通快速驱动函数,将值以写1的方式写入显存
 ----------------------------------------------------------------*/
-void lcd_driver_Write_1(uint16_t x,uint16_t ypage,uint8_t u8_value)
+static void lcd_driver_Write_1(uint16_t x,uint16_t ypage,uint8_t u8_value)
 {
 	//---------全屏缓存-----------
 	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
@@ -67,7 +73,7 @@ void lcd_driver_Write_1(uint16_t x,uint16_t ypage,uint8_t u8_value)
   * 名称: lcd_driver_Write_inv(uint16_t x,uint16_t ypage,uint8_t u8_value)
   * 功能: 普通快速驱动函数,将值以"反色"的方式写入显存
 ----------------------------------------------------------------*/
-void lcd_driver_Write_inv(uint16_t x,uint16_t ypage,uint8_t u8_value)
+static void lcd_driver_Write_inv(uint16_t x,uint16_t ypage,uint8_t u8_value)
 {
 	//---------全屏缓存-----------
 	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
@@ -84,7 +90,7 @@ void lcd_driver_Write_inv(uint16_t x,uint16_t ypage,uint8_t u8_value)
   * 名称: lcd_driver_Write_0_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
   * 功能: 高级驱动函数,在限制区域(Box)内,将值以清0的方式写入到显存
 ----------------------------------------------------------------*/
-void lcd_driver_Write_0_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
+static void lcd_driver_Write_0_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
 {
 	if((x<lcd_driver.Box.x_min)||(x>lcd_driver.Box.x_max))
 		return;
@@ -113,7 +119,7 @@ void lcd_driver_Write_0_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
   * 名称: lcd_driver_Write_1_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
   * 功能: 高级驱动函数,在限制区域(Box)内,将值以写1的方式写入到显存
 ----------------------------------------------------------------*/
-void lcd_driver_Write_1_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
+static void lcd_driver_Write_1_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
 {
 	if((x<lcd_driver.Box.x_min)||(x>lcd_driver.Box.x_max))
 		return;
@@ -144,7 +150,7 @@ void lcd_driver_Write_1_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
   * 名称: lcd_driver_Write_inv_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
   * 功能: 高级驱动函数,在限制区域(Box)内,将值以反写的方式写入到显存
 ----------------------------------------------------------------*/
-void lcd_driver_Write_inv_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
+static void lcd_driver_Write_inv_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
 {
 	if((x<lcd_driver.Box.x_min)||(x>lcd_driver.Box.x_max))
 		return;
@@ -251,7 +257,7 @@ void OLED_Set_Driver_Box(uint16_t x_min ,uint16_t y_min ,uint16_t x_max,uint16_t
   * 功能: 将u8_page值以对其坐标的方式写到显存
   * 说明: 坐标点x,y支持负数
 ----------------------------------------------------------------*/
-void OLED_Draw_One_Byte(int16_t x,volatile int16_t y,uint8_t u8_page)
+static void OLED_Draw_One_Byte(int16_t x,volatile int16_t y,uint8_t u8_page)
 {
 	//---------全屏缓存-----------
 	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
@@ -1117,7 +1123,7 @@ void OLED_Draw_Ascii(int16_t x,int16_t y,uint8_t chr)
 ----------------------------------------------------------------*/
 void OLED_Draw_int32(int16_t x,int16_t y,int16_t num)
 {
-	unsigned long sum=1;
+	uint32_t sum=1;
 	if(num < 0)
 	{
 		OLED_Draw_Bitmap(x,y,lcd_driver.fonts_ASCII->width,lcd_driver.fonts_ASCII->high,(uint8_t*)(lcd_driver.fonts_ASCII->font + lcd_driver.fonts_ASCII->byte_size * ('-'-0x20)));
@@ -1134,7 +1140,7 @@ void OLED_Draw_int32(int16_t x,int16_t y,int16_t num)
 		OLED_Draw_Bitmap(x,y,lcd_driver.fonts_ASCII->width,lcd_driver.fonts_ASCII->high,(uint8_t*)(lcd_driver.fonts_ASCII->font + lcd_driver.fonts_ASCII->byte_size * ('1'-0x20)));
 		return;
 	}
-	while(sum<=num)
+	while(sum <= (uint16_t)num)
 	{
 		sum = sum*10;
 	}

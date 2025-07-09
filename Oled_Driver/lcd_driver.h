@@ -1,8 +1,24 @@
+/*
+	Copyright 2025 Lu Zhihao
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 #ifndef _LCD_DRIVER_H_
 #define _LCD_DRIVER_H_
 
 #include "stdint.h"
-#include "lcd_Wegui_Config.h"
+#include "lcd_wegui_Config.h"
 #include "lcd_res.h"
 
 
@@ -83,42 +99,6 @@ typedef struct lcd_driver
 
 
 /*--------------------------------------------------------------
-  * 名称: lcd_driver_Write_0(uint16_t x,uint16_t ypage,uint8_t u8_value)
-  * 功能: 普通快速驱动函数,将值以清0的方式写入显存
-----------------------------------------------------------------*/
-void lcd_driver_Write_0(uint16_t x,uint16_t ypage,uint8_t u8_value);
-
-/*--------------------------------------------------------------
-  * 名称: lcd_driver_Write_1(uint16_t x,uint16_t ypage,uint8_t u8_value)
-  * 功能: 普通快速驱动函数,将值以写1的方式写入显存
-----------------------------------------------------------------*/
-void lcd_driver_Write_1(uint16_t x,uint16_t ypage,uint8_t u8_value);
-
-/*--------------------------------------------------------------
-  * 名称: lcd_driver_Write_inv(uint16_t x,uint16_t ypage,uint8_t u8_value)
-  * 功能: 普通快速驱动函数,将值以"反色"的方式写入显存
-----------------------------------------------------------------*/
-void lcd_driver_Write_inv(uint16_t x,uint16_t ypage,uint8_t u8_value);
-
-/*--------------------------------------------------------------
-  * 名称: lcd_driver_Write_0_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
-  * 功能: 高级驱动函数,在限制区域(Box)内,将值以清0的方式写入到显存
-----------------------------------------------------------------*/
-void lcd_driver_Write_0_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value);
-
-/*--------------------------------------------------------------
-  * 名称: lcd_driver_Write_1_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
-  * 功能: 高级驱动函数,在限制区域(Box)内,将值以写1的方式写入到显存
-----------------------------------------------------------------*/
-void lcd_driver_Write_1_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value);
-
-/*--------------------------------------------------------------
-  * 名称: lcd_driver_Write_inv_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
-  * 功能: 高级驱动函数,在限制区域(Box)内,将值以反写的方式写入到显存
-----------------------------------------------------------------*/
-void lcd_driver_Write_inv_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value);
-
-/*--------------------------------------------------------------
   * 名称: OLED_Set_Driver_Mode(lcd_driver_mode_t mode)
   * 传入: mode 驱动模式
   * 功能: 设置驱动方式
@@ -131,15 +111,6 @@ void OLED_Set_Driver_Mode(lcd_driver_mode_t mode);
   * 功能: 设置高级驱动的限制区域(Box)
 ----------------------------------------------------------------*/
 void OLED_Set_Driver_Box(uint16_t x_min ,uint16_t y_min ,uint16_t x_max,uint16_t y_max);
-
-/*--------------------------------------------------------------
-  * 名称: OLED_Draw_One_Byte(int16_t x,int16_t y,uint8_t u8_value)
-  * 传入1: (x,y)坐标
-  * 传入2: u8_page 一字节点阵数据
-  * 功能: 将u8_page值以对其坐标的方式写到显存
-  * 说明: 坐标点x,y支持负数
-----------------------------------------------------------------*/
-void OLED_Draw_One_Byte(int16_t x,int16_t y,uint8_t u8_page);
 
 /*--------------------------------------------------------------
   * 名称: OLED_Draw_Pixl(int16_t x,uint16_t y)
@@ -206,10 +177,6 @@ void OLED_Fill_Box(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max);
   * 说明: 坐标点支持负数
 ----------------------------------------------------------------*/
 void OLED_Draw_Bitmap(int16_t x0,int16_t y0,uint8_t sizex,uint8_t sizey,uint8_t BMP[]);
-
-
-
-
 
 /*--------------------------------------------------------------
   * 名称: OLED_Fill_RBox(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max, int8_t r)

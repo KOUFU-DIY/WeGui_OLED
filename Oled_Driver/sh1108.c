@@ -1,5 +1,20 @@
+/*
+	Copyright 2025 Lu Zhihao
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 #include "sh1108.h"
-#include "lcd_Wegui_driver.h"
+#include "lcd_wegui_driver.h"
 
 
 //默认8位IIC接口地址为:0x78
@@ -33,12 +48,12 @@ void SH1108_Set_Address_x(unsigned char x)
 void SH1108_Set_Address_ypage(unsigned char page)
 {
 	//方式1:单字节发送
-	LCD_Send_1Cmd(0xb0);
-	LCD_Send_1Cmd(page);
+	//LCD_Send_1Cmd(0xb0);
+	//LCD_Send_1Cmd(page);
 	
 	//方式2:连续发送
-	//uint8_t i[]={0xb0,page};
-	//LCD_Send_nCmd(i,2);
+	uint8_t i[]={0xb0,page};
+	LCD_Send_nCmd(i,2);
 }
 
 /*--------------------------------------------------------------
@@ -55,8 +70,8 @@ void SH1108_Set_Address_x_ypage(unsigned char x,unsigned char page)
 	SH1108_Set_Address_ypage(page);
 	
 	//方式2:连续发送(优化等级开高了可能有问题)
-	//uint8_t i[]={((x>>4) | 0x10),(x&0x0f),0xb0,page};
-	//LCD_Send_nCmd(i,4);
+	uint8_t i[]={((x>>4) | 0x10),(x&0x0f),0xb0,page};
+	LCD_Send_nCmd(i,4);
 }
 
 

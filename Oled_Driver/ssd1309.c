@@ -1,5 +1,21 @@
-#include "SSD1309.h"
-#include "lcd_WeGui_driver.h"
+/*
+	Copyright 2025 Lu Zhihao
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+#include "ssd1309.h"
+#include "lcd_wegui_driver.h"
 
 
 
@@ -38,12 +54,12 @@ void SSD1309_Set_Address_ypage(unsigned char page)
 void SSD1309_Set_Address_x_ypage(unsigned char x,unsigned char page)
 {
 	//方式1:单字节发送
-	SSD1309_Set_Address_x(x);
-	SSD1309_Set_Address_ypage(page);
+	//SSD1309_Set_Address_x(x);
+	//SSD1309_Set_Address_ypage(page);
 	
-	//方式2:连续发送(优化等级开高了可能有问题)
-	//uint8_t i[]={((x>>4) | 0x10),(x&0x0f),0xb0+page};
-	//LCD_Send_nCmd(i,4);
+	//方式2:连续发送
+	uint8_t i[]={((x>>4) | 0x10),(x&0x0f),0xb0+page};
+	LCD_Send_nCmd(i,3);
 }
 
 

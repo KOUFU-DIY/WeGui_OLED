@@ -1,5 +1,21 @@
+/*
+	Copyright 2025 Lu Zhihao
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 #include "ssd1327.h"
-#include "lcd_Wegui_driver.h"
+#include "lcd_wegui_driver.h"
 
 
 /*--------------------------------------------------------------
@@ -33,12 +49,12 @@ void SSD1327_Set_Addr_y(unsigned char y0,unsigned char y1)
 void SSD1327_Set_Addr(unsigned char x0,unsigned char y0,unsigned char x1,unsigned char y1)
 {
 	//方式1:单字节发送
-	SSD1327_Set_Addr_x(x0,x1);
-	SSD1327_Set_Addr_y(y0,y1);
+	//SSD1327_Set_Addr_x(x0,x1);
+	//SSD1327_Set_Addr_y(y0,y1);
 	
 	//方式2:连续发送(优化等级开高了可能有问题)
-	//uint8_t i[]={0x15,x0,x1,0x75,y0,y1};
-	//LCD_Send_nCmd(i,6);
+	uint8_t i[]={0x15,x0,x1,0x75,y0,y1};
+	LCD_Send_nCmd(i,6);
 }
 
 
