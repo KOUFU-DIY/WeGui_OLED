@@ -1,4 +1,23 @@
+视频地址:https://www.bilibili.com/video/BV1RjMbzCE37
+企鹅交流群:787475855
+
+V0.４Beta
+
+1.增加自定义显存工作模式, 大幅减少大屏得RAM占用
+
+2.修复在优化等级高的时候容易出现的刷屏错位问题
+
+3.修复bitmap刷图函数不能刷大图的问题
+
+4.上位机更新显示内存
+
+5.主函数里增加了简易图形demo,可自行打开测试
+
+![7ac66872501286051f33cc6fbf6addaf](https://github.com/user-attachments/assets/b601bc3d-4258-4ca8-a941-43b985cb5493)
+
+
 V0.3Beta
+
 1.增加uart通讯, 支持上位机控制
 
 2.完善支持"uart显示器"串流功能, 需要配套上位机操作
@@ -28,8 +47,6 @@ V0.2Beta
 
 6.重整部分变量名称,oled调整为lcd
 
-视频地址:https://www.bilibili.com/video/BV1RjMbzCE37
-企鹅交流群:787475855
 
 ![image](https://github.com/user-attachments/assets/013a815e-4263-43dd-a715-9557b7af5616)
 
