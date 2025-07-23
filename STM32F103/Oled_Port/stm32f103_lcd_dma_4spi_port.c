@@ -24,11 +24,11 @@ limitations under the License.
 #include "stdint.h"
 
 
-#define OLED_SPIx                   SPI1
-#define OLED_DMAx                   DMA1
-#define OLED_DMA_CHANNELx           DMA1_Channel3 //OLED_SPIx_TX
-#define OLED_DMA_COMPLETE_FLAG      DMA1_FLAG_TC3
-#define OLED_DMA_PeripheralBaseAddr (&SPI1->DR)
+#define LCD_SPIx                   SPI1
+#define LCD_DMAx                   DMA1
+#define LCD_DMA_CHANNELx           DMA1_Channel3 //LCD_SPIx_TX
+#define LCD_DMA_COMPLETE_FLAG      DMA1_FLAG_TC3
+#define LCD_DMA_PeripheralBaseAddr (&SPI1->DR)
 #define RCC_APB2Periph_SPIx          RCC_APB2Periph_SPI1
 
 
@@ -79,13 +79,13 @@ void LCD_Port_Init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPIx, ENABLE);
 	RCC_PCLK2Config(RCC_HCLK_Divx);//分频RCC_HCLK_Div1 RCC_HCLK_Div2 RCC_HCLK_Div4...
 	
-	SPI_Init(OLED_SPIx, &SPI_InitStructure);
+	SPI_Init(LCD_SPIx, &SPI_InitStructure);
 	
 	
 	DMA_InitTypeDef DMA_InitStructure;
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)OLED_DMA_PeripheralBaseAddr;
-  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)lcd_driver.LCD_GRAM;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)LCD_DMA_PeripheralBaseAddr;
+  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)LCD_driver.LCD_GRAM;
   DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
   DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
   DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
@@ -96,15 +96,15 @@ void LCD_Port_Init(void)
   DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
   DMA_InitStructure.DMA_BufferSize = 1;
   DMA_DeInit(DMA1_Channel6);
-  DMA_Init(OLED_DMA_CHANNELx, &DMA_InitStructure);
+  DMA_Init(LCD_DMA_CHANNELx, &DMA_InitStructure);
 	
 
 
-	SPI_I2S_DMACmd(OLED_SPIx,SPI_I2S_DMAReq_Tx,ENABLE);
+	SPI_I2S_DMACmd(LCD_SPIx,SPI_I2S_DMAReq_Tx,ENABLE);
 	
-	SPI_Cmd(OLED_SPIx, ENABLE);
+	SPI_Cmd(LCD_SPIx, ENABLE);
 	
-	DMA_ITConfig(OLED_DMA_CHANNELx, DMA_IT_TC, ENABLE);
+	DMA_ITConfig(LCD_DMA_CHANNELx, DMA_IT_TC, ENABLE);
 	
 	NVIC_InitTypeDef NVIC_InitStruct;
 	NVIC_InitStruct.NVIC_IRQChannel = DMA1_Channel3_IRQn;
@@ -163,27 +163,21 @@ void LCD_delay_ms(volatile uint32_t ms)
 void LCD_Send_1Cmd(uint8_t dat)
 {
 	while(DMA_State!=DMA_FREE){;}
-	while(1)
-	{
-		if((OLED_SPIx->SR & SPI_I2S_FLAG_BSY) == (uint16_t)RESET)
-		{
-			break;
-		}
-	};
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
 		
 	LCD_DC_Clr();
 	LCD_CS_Clr();
 	{
 		//方式1,调库发送
-		//while((OLED_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
-		//SPI_I2S_SendData(OLED_SPIx, dat);
+		//while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+		//SPI_I2S_SendData(LCD_SPIx, dat);
 		
 		//方式2,寄存器操作发送
-		while((OLED_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
-		OLED_SPIx->DR = dat;
+		while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+		LCD_SPIx->DR = dat;
 	}
-	while((OLED_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
-	while((OLED_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
 	LCD_CS_Set();
 }
 
@@ -197,18 +191,18 @@ void LCD_Send_1Cmd(uint8_t dat)
 void LCD_Send_1Dat(uint8_t dat)
 {
 	while(DMA_State!=DMA_FREE){;}
-	while((OLED_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
 	LCD_DC_Set();
 	LCD_CS_Clr();
 	{
 		//方式1,调库发送
-		//SPI_I2S_SendData(OLED_SPIx, dat);
+		//SPI_I2S_SendData(LCD_SPIx, dat);
 		
 		//方式2,寄存器操作发送
-		OLED_SPIx->DR = dat;
+		LCD_SPIx->DR = dat;
 	}
-	while((OLED_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
-	while((OLED_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
 	LCD_CS_Set();
 }
 
@@ -222,14 +216,16 @@ void LCD_Send_1Dat(uint8_t dat)
 ----------------------------------------------------------------*/
 void LCD_Send_nDat(uint8_t *p,uint16_t num)
 {
-	while((OLED_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
+	while(DMA_State!=DMA_FREE){;}
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
 	LCD_DC_Set();
 	LCD_CS_Clr();
 	
-	OLED_DMA_CHANNELx->CMAR = (uint32_t)p;
-	OLED_DMA_CHANNELx->CNDTR = (uint32_t)num; 
-	DMA_Cmd(OLED_DMA_CHANNELx, ENABLE);
+	LCD_DMA_CHANNELx->CMAR = (uint32_t)p;
+	LCD_DMA_CHANNELx->CNDTR = (uint32_t)num; 
+	DMA_Cmd(LCD_DMA_CHANNELx, ENABLE);
 }
+
 
 /*--------------------------------------------------------------
   * 名称: LCD_Send_nCmd(uint8_t *p,uint16_t num)
@@ -241,21 +237,27 @@ void LCD_Send_nDat(uint8_t *p,uint16_t num)
 ----------------------------------------------------------------*/
 void LCD_Send_nCmd(uint8_t *p,uint16_t num)
 {
-	static uint8_t DMA_INT_Buff[4];//最多设置4个命令
+	while(DMA_State!=DMA_FREE){;}
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
 	uint8_t i=0;
-	while(i<num)
-	{
-		DMA_INT_Buff[i] = p[i];
-		i++;
-	}
-	while((OLED_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
 	LCD_DC_Clr();
 	LCD_CS_Clr();
-
-	OLED_DMA_CHANNELx->CMAR = (uint32_t)DMA_INT_Buff;
-	OLED_DMA_CHANNELx->CNDTR = (uint32_t)num; 
-	DMA_Cmd(OLED_DMA_CHANNELx, ENABLE);
+	while(num>i)	  
+	{
+		//方式1,调库发送
+		//SPI_I2S_SendData(LCD_SPIx, p[i++]);
+		//while (SPI_I2S_GetFlagStatus(LCD_SPIx, SPI_I2S_FLAG_TXE) == SET);
+		
+		//方式2,寄存器操作发送
+		while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+		LCD_SPIx->DR = p[i++];
+		
+	}
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_TXE) == (uint16_t)RESET);
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
+	LCD_CS_Set();
 }
+
 #endif
 
 
@@ -282,57 +284,67 @@ void LCD_Send_nCmd(uint8_t *p,uint16_t num)
 #if defined (LCD_USE_NORMAL_OLED)
 
 #if (LCD_MODE == _FULL_BUFF_FULL_UPDATE)
-//---------方式1:全屏刷新----------
-//--优点:全屏刷新
-//--缺点:内容不变的区域也参与了刷新
+//---------全屏刷新----------
 uint8_t LCD_Refresh(void)
 {
 	while(DMA_State != DMA_FREE){;}
-	DMA_reflash_step = 0;
-	DMA_State = DMA_REFLASH_DAT;
-	LCD_Set_Addr(0,0);//发送DMA 激活DMA
-	//DMA中断里执行余下指令
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
+	LCD_Set_Addr(0,0);
+	while(DMA_State != DMA_FREE){;}
+	DMA_State = DMA_REFLASH;
+	DMA_reflash_step=1;
+		
+	//发送第一行,激活dma  方式1,函数发送 因下一步中断需要用DMA_State而修改了值, 此时DMA_State不为FREE, 不能直接用该函数, 会进入死循环
+	//LCD_Send_nDat(&LCD_driver.LCD_GRAM[0][0][0],SCREEN_WIDTH);
+	
+	//发送第一行,激活dma  方式2,将函数拆开,去除DMA_State不为FREE的判断
+	while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
+	LCD_DC_Set();
+	LCD_CS_Clr();
+	LCD_DMA_CHANNELx->CMAR = (uint32_t)&LCD_driver.LCD_GRAM[0][0];
+	LCD_DMA_CHANNELx->CNDTR = (uint32_t)SCREEN_WIDTH; 
+	DMA_Cmd(LCD_DMA_CHANNELx, ENABLE);
+	
+
+	//DMA中断里刷新余下行
 	return 0;
 }
+
 void DMA1_Channel3_IRQHandler()
 {
-		DMA_Cmd(OLED_DMA_CHANNELx, DISABLE);
-		DMA_ClearFlag(OLED_DMA_COMPLETE_FLAG);
+		lcd_dma_step_t save_DMA_State=DMA_State;
+		save_DMA_State=DMA_State;
+		DMA_State = DMA_FREE;//解决中断里因该变量引起死循环的问题
+		DMA_Cmd(LCD_DMA_CHANNELx, DISABLE);
+		DMA_ClearFlag(LCD_DMA_COMPLETE_FLAG);
 	
 		//等待SPI发完(DMA完毕不代表SPI完毕)
-		while((OLED_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET){;}
+		while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET){;}
 		LCD_CS_Set();
 	
-		switch(DMA_State)
+		switch(save_DMA_State)
 		{
 			case DMA_FREE:break;
 			case DMA_NORMAL_CMD:
 			{
-				DMA_State = DMA_FREE;
+				save_DMA_State = DMA_FREE;
 				LCD_CS_Set();
 			}break;
-			case DMA_REFLASH_CMD:
+			case DMA_REFLASH:
 			{
-				LCD_Set_Addr(0,DMA_reflash_step);
-				DMA_State = DMA_REFLASH_DAT;
-			}break;
-			case DMA_REFLASH_DAT:
-			{
-				LCD_Send_nDat(&lcd_driver.LCD_GRAM[DMA_reflash_step++][0],SCREEN_WIDTH);
-				DMA_State = DMA_REFLASH_CMD;
 				if(DMA_reflash_step >= GRAM_YPAGE_NUM)
 				{
+					LCD_CS_Set();
 					DMA_reflash_step = 0;
-					DMA_State = DMA_DONE;
+					save_DMA_State = DMA_FREE;
+					break;
 				}
+				LCD_Set_Addr(0,DMA_reflash_step);
+				while((LCD_SPIx->SR & SPI_I2S_FLAG_BSY) != (uint16_t)RESET);
+				LCD_Send_nDat(&LCD_driver.LCD_GRAM[DMA_reflash_step++][0],SCREEN_WIDTH);
 			}break;
-			case DMA_DONE:
-			{
-				LCD_CS_Set();
-				DMA_reflash_step = 0;
-				DMA_State = DMA_FREE;
-			}
 		}
+		DMA_State = save_DMA_State;
 }
 
 #elif (LCD_MODE == _FULL_BUFF_DYNA_UPDATE)

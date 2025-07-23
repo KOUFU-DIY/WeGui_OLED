@@ -21,18 +21,12 @@ limitations under the License.
 #include "stm32f10x_spi.h"
 
 
-/*------------------------------------------------------
-** 但在屏幕通讯速率耐受较低时,建议使用"库函数"操作IO通讯
-** 但在屏幕通讯速率耐受较高时,建议使用"寄存器"操作IO通讯
-------------------------------------------------------*/
 
 typedef volatile enum LCD_dma_step
 {
 	DMA_FREE = 0,
 	DMA_NORMAL_CMD = 1,
-	DMA_REFLASH_CMD = 2,
-	DMA_REFLASH_DAT = 3,
-	DMA_DONE = 4,
+	DMA_REFLASH = 2,
 }lcd_dma_step_t;
 
 
