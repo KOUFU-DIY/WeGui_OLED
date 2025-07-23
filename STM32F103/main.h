@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "stm32f10x.h"
 #include "stm32f10x_it.h"
-#include "LCD_driver.h"
+#include "lcd_driver.h"
 #include "lcd_Wegui_driver.h"
 
 void delay_ms(uint32_t ms);
