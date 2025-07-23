@@ -110,7 +110,7 @@ static void lcd_driver_Write_0_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
 	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
 	if(ypage == lcd_driver.lcd_refresh_ypage)
 	{
-		lcd_driver.LCD_GRAM[0][x] &= (~u8_value);
+		lcd_driver.LCD_GRAM[ypage%GRAM_YPAGE_NUM][x] &= (~u8_value);
 	}
 	#endif
 	
@@ -140,7 +140,7 @@ static void lcd_driver_Write_1_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
 	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
 	if(ypage == lcd_driver.lcd_refresh_ypage)
 	{
-		lcd_driver.LCD_GRAM[0][x] |= u8_value;
+		lcd_driver.LCD_GRAM[ypage%GRAM_YPAGE_NUM][x] |= u8_value;
 	}
 	#endif
 	
@@ -172,7 +172,7 @@ static void lcd_driver_Write_inv_inBox(uint16_t x,uint16_t ypage,uint8_t u8_valu
 	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
 	if(ypage == lcd_driver.lcd_refresh_ypage)
 	{
-		lcd_driver.LCD_GRAM[0][x] ^= u8_value;
+		lcd_driver.LCD_GRAM[ypage%GRAM_YPAGE_NUM][x] ^= u8_value;
 	}
 	#endif
 }
