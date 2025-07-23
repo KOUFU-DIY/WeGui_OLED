@@ -957,6 +957,11 @@
           <GroupName>Oled_Driver</GroupName>
           <Files>
             <File>
+              <FileName>lcd_driver.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\Oled_Driver\lcd_driver.h</FilePath>
+            </File>
+            <File>
               <FileName>lcd_driver.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Oled_Driver\lcd_driver.c</FilePath>
