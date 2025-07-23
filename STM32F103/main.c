@@ -97,195 +97,211 @@ void gui_demo()//刷图demo
 {
 	#define DEMO_DELAY_MS 500
 	
-//	
-//	//--------------文字显示字体1-----------------
-//	do
-//	{
-//		//1.---清空缓存---
-//		OLED_Clear_GRAM();
-//		//2.-----绘图-----
-//		lcd_driver.fonts_ASCII = &ascii_SongTi_8X16;//ASCII字体
-//		lcd_driver.fonts_UTF8_cut = &SongTi_UTF8_16X16;//UTF8字体(裁切)
-//		lcd_driver.newline_high = lcd_driver.fonts_UTF8_cut->high;//更新\n换行间距
-//		OLED_Draw_UTF8_String(0,0,(uint8_t*)"Fonts 中文\n8x16\n16x16");
-//	}while(LCD_Refresh());//直到每行都刷完
-//	delay_ms(DEMO_DELAY_MS);
+	
+	//--------------文字显示字体1-----------------
+	do
+	{
+		//0.---等待发送完毕---
+		while(LCD_is_Busy()!=0);//DMA方式专用,其他模式可省略
+		//1.---清空缓存---
+		OLED_Clear_GRAM();
+		//2.-----绘图-----
+		lcd_driver.fonts_ASCII = &ascii_SongTi_8X16;//ASCII字体
+		lcd_driver.fonts_UTF8_cut = &SongTi_UTF8_16X16;//UTF8字体(裁切)
+		lcd_driver.newline_high = lcd_driver.fonts_UTF8_cut->high;//更新\n换行间距
+		OLED_Draw_UTF8_String(0,0,(uint8_t*)"Fonts 中文\n8x16\n16x16");
+	}while(LCD_Refresh());//直到每行都刷完
+	delay_ms(DEMO_DELAY_MS);
 
-//	//--------------文字显示字体2-----------------
-//	do
-//	{
-//		//1.---清空缓存---
-//		OLED_Clear_GRAM();
-//		//2.-----绘图-----
-//		lcd_driver.fonts_ASCII = &ascii_SongTi_6X12;//ASCII字体
-//		lcd_driver.fonts_UTF8_cut = &SongTi_UTF8_12X12;//UTF8字体(裁切)
-//		lcd_driver.newline_high = lcd_driver.fonts_UTF8_cut->high;//更新\n换行间距
-//		OLED_Draw_UTF8_String(0,0,(uint8_t*)"Fonts 中文\n6x12\12x12");
-//	}while(LCD_Refresh());//直到每行都刷完
-//	delay_ms(DEMO_DELAY_MS);
-//	
+	//--------------文字显示字体2-----------------
+	do
+	{
+		//0.---等待发送完毕---
+		while(LCD_is_Busy()!=0);//DMA方式专用,其他模式可省略
+		//1.---清空缓存---
+		OLED_Clear_GRAM();
+		//2.-----绘图-----
+		lcd_driver.fonts_ASCII = &ascii_SongTi_6X12;//ASCII字体
+		lcd_driver.fonts_UTF8_cut = &SongTi_UTF8_12X12;//UTF8字体(裁切)
+		lcd_driver.newline_high = lcd_driver.fonts_UTF8_cut->high;//更新\n换行间距
+		OLED_Draw_UTF8_String(0,0,(uint8_t*)"Fonts 中文\n6x12\12x12");
+	}while(LCD_Refresh());//直到每行都刷完
+	delay_ms(DEMO_DELAY_MS);
+	
 
-//	
+	
 
-//	//--------------------画线-----------------------
-//	{
-//		uint16_t x=0;
-//		while(x <= SCREEN_WIDTH-1)
-//		{
-//			do
-//			{
-//				//1.---清空缓存---
-//				OLED_Clear_GRAM();
-//				//2.-----绘图-----
-//				OLED_Draw_Line(0,0,x,SCREEN_HIGH-1);
-//				OLED_Draw_Line(SCREEN_WIDTH-1,0,SCREEN_WIDTH-1-x,SCREEN_HIGH-1);
-//				
-//			}while(LCD_Refresh());//直到每行都刷完
-//			x++;
-//		}
-//	}
-//	
-//	{
-//		uint16_t y=0;
-//		while(y <= SCREEN_HIGH-1)
-//		{
-//			do
-//			{
-//				//1.---清空缓存---
-//				OLED_Clear_GRAM();
-//				//2.-----绘图-----
-//				OLED_Draw_Line(0,0,SCREEN_WIDTH-1,SCREEN_HIGH-y);
-//				OLED_Draw_Line(SCREEN_WIDTH-1,0,0,SCREEN_HIGH-y);
-//				
-//			}while(LCD_Refresh());//直到每行都刷完
-//			y++;
-//		}
-//	}
-//	//--------------------画圆-----------------------
-//	{
-//		uint8_t i=0;
-//		uint8_t C[]=
-//		{
-//			C_RU,//右上八分之一圆
-//			C_UR,//上右八分之一圆
-//			C_UL,//上左八分之一圆
-//			C_LU,//左上八分之一圆
-//			C_LD,//左下八分之一圆
-//			C_DL,//下左八分之一圆
-//			C_DR,//下右八分之一圆
-//			C_RD,//右下八分之一圆
-//			
-//			C_QRU,//右上角四分圆
-//			C_QLU,//左上角四分圆
-//			C_QLD,//左下角四分圆
-//			C_QRD,//右下角四分圆
-//			
-//			C_HR,//右半圆
-//			C_HU,//上半圆
-//			C_HL,//左半圆
-//			C_HD,//下半圆
-//			
-//			C_HR|C_UL,//右半圆+上左 (任意组合)
-//			C_HU|C_LD,//上半圆+左下
-//			C_HL|C_DR,//左半圆+下右
-//			C_HD|C_RU,//下半圆+右上
+	//--------------------画线-----------------------
+	{
+		uint16_t x=0;
+		while(x <= SCREEN_WIDTH-1)
+		{
+			do
+			{
+				//0.---等待发送完毕---
+				while(LCD_is_Busy()!=0);//DMA方式专用,其他模式可省略
+				//1.---清空缓存---
+				OLED_Clear_GRAM();
+				//2.-----绘图-----
+				OLED_Draw_Line(0,0,x,SCREEN_HIGH-1);
+				OLED_Draw_Line(SCREEN_WIDTH-1,0,SCREEN_WIDTH-1-x,SCREEN_HIGH-1);
+				
+			}while(LCD_Refresh());//直到每行都刷完
+			x++;
+		}
+	}
+	
+	{
+		uint16_t y=0;
+		while(y <= SCREEN_HIGH-1)
+		{
+			do
+			{
+				//0.---等待发送完毕---
+				while(LCD_is_Busy()!=0);//DMA方式专用,其他模式可省略
+				//1.---清空缓存---
+				OLED_Clear_GRAM();
+				//2.-----绘图-----
+				OLED_Draw_Line(0,0,SCREEN_WIDTH-1,SCREEN_HIGH-y);
+				OLED_Draw_Line(SCREEN_WIDTH-1,0,0,SCREEN_HIGH-y);
+				
+			}while(LCD_Refresh());//直到每行都刷完
+			y++;
+		}
+	}
+	//--------------------画圆-----------------------
+	{
+		uint8_t i=0;
+		uint8_t C[]=
+		{
+			C_RU,//右上八分之一圆
+			C_UR,//上右八分之一圆
+			C_UL,//上左八分之一圆
+			C_LU,//左上八分之一圆
+			C_LD,//左下八分之一圆
+			C_DL,//下左八分之一圆
+			C_DR,//下右八分之一圆
+			C_RD,//右下八分之一圆
+			
+			C_QRU,//右上角四分圆
+			C_QLU,//左上角四分圆
+			C_QLD,//左下角四分圆
+			C_QRD,//右下角四分圆
+			
+			C_HR,//右半圆
+			C_HU,//上半圆
+			C_HL,//左半圆
+			C_HD,//下半圆
+			
+			C_HR|C_UL,//右半圆+上左 (任意组合)
+			C_HU|C_LD,//上半圆+左下
+			C_HL|C_DR,//左半圆+下右
+			C_HD|C_RU,//下半圆+右上
 
-//			C_ALL,//完整的园
-//		};
-//		while(i<=(sizeof(C)/sizeof(uint8_t)-1))
-//		{
-//			do
-//			{
-//				OLED_Clear_GRAM();
-//				OLED_Draw_Circel_part(32,20,16,(circle_part_t)C[i]);
-//				OLED_Fill_Circel_part(SCREEN_WIDTH-32,16,16,(circle_part_t)C[i]);
-//			}while(LCD_Refresh());//直到每行都刷完
-//			delay_ms(150);
-//			i++;
-//		}
-//	}
-//	delay_ms(DEMO_DELAY_MS);
-//	
-//	//--------------------矩形-----------------------
-//	{
-//		uint16_t i=0;
-//		while((i<SCREEN_HIGH) || (i<SCREEN_WIDTH))
-//		{
-//			uint8_t x,y;
-//			if(i < SCREEN_WIDTH){x=i;}else{x=SCREEN_WIDTH-1;}
-//			if(i < SCREEN_HIGH){y=i;}else{y=SCREEN_HIGH-1;}
-//			do
-//			{
-//				OLED_Clear_GRAM();
-//				OLED_Draw_Box(0,0, x, y);
-//			}while(LCD_Refresh());
-//			i++;
-//		}
-//	}
-//	delay_ms(DEMO_DELAY_MS);
-//	{
-//		uint16_t i=0;
-//		while((i<SCREEN_HIGH) || (i<SCREEN_WIDTH))
-//		{
-//			uint8_t x,y;
-//			if(i < SCREEN_WIDTH){x=i;}else{x=SCREEN_WIDTH-1;}
-//			if(i < SCREEN_HIGH){y=i;}else{y=SCREEN_HIGH-1;}
-//			do
-//			{
-//				OLED_Clear_GRAM();
-//				OLED_Fill_Box(0,0, x, y);
-//			}while(LCD_Refresh());
-//			i++;
-//		}
-//	}
-//	delay_ms(DEMO_DELAY_MS);
-//	
-//	//--------------------圆角矩形-----------------------
-//	{
-//		uint16_t r=0;
-//		while(r<SCREEN_HIGH)
-//		{
-//			do
-//			{
-//				OLED_Clear_GRAM();
-//				OLED_Draw_RBox(0,0,SCREEN_WIDTH-1, SCREEN_HIGH-1,r);
-//			}while(LCD_Refresh());
-//			r++;
-//		}
-//	}
-//	delay_ms(DEMO_DELAY_MS);
-//	{
-//		uint16_t r=0;
-//		while(r<SCREEN_HIGH)
-//		{
-//			do
-//			{
-//				OLED_Clear_GRAM();
-//				OLED_Fill_RBox(0,0,SCREEN_WIDTH-1, SCREEN_HIGH-1,r);
-//			}while(LCD_Refresh());
-//			r++;
-//		}
-//	}
-//	delay_ms(DEMO_DELAY_MS);
-//	//--------------------十进制数字-----------------------
-//	{
-//		int16_t r=-500;
-//		while(r<1200)
-//		{
-//			do
-//			{
-//				OLED_Clear_GRAM();
-//				OLED_Draw_int32(0,0,r);//十进制带符号
-//			}while(LCD_Refresh());
-//			//delay_ms(5);
-//			r++;
-//		}
-//	}
-//	delay_ms(DEMO_DELAY_MS);
-//	
+			C_ALL,//完整的园
+		};
+		while(i<=(sizeof(C)/sizeof(uint8_t)-1))
+		{
+			do
+			{
+				while(LCD_is_Busy()!=0);//DMA方式专用,其他模式可省略
+				OLED_Clear_GRAM();
+				OLED_Draw_Circel_part(32,20,16,(circle_part_t)C[i]);
+				OLED_Fill_Circel_part(SCREEN_WIDTH-32,16,16,(circle_part_t)C[i]);
+			}while(LCD_Refresh());//直到每行都刷完
+			delay_ms(50);
+			i++;
+		}
+	}
+	delay_ms(DEMO_DELAY_MS);
+	
+	//--------------------矩形-----------------------
+	{
+		uint16_t i=0;
+		while((i<SCREEN_HIGH) || (i<SCREEN_WIDTH))
+		{
+			uint8_t x,y;
+			if(i < SCREEN_WIDTH){x=i;}else{x=SCREEN_WIDTH-1;}
+			if(i < SCREEN_HIGH){y=i;}else{y=SCREEN_HIGH-1;}
+			do
+			{
+				while(LCD_is_Busy()!=0);//DMA方式专用,其他模式可省略
+				OLED_Clear_GRAM();
+				OLED_Draw_Box(0,0, x, y);
+			}while(LCD_Refresh());
+			i++;
+		}
+	}
+	delay_ms(DEMO_DELAY_MS);
+	{
+		uint16_t i=0;
+		while((i<SCREEN_HIGH) || (i<SCREEN_WIDTH))
+		{
+			uint8_t x,y;
+			if(i < SCREEN_WIDTH){x=i;}else{x=SCREEN_WIDTH-1;}
+			if(i < SCREEN_HIGH){y=i;}else{y=SCREEN_HIGH-1;}
+			do
+			{
+				while(LCD_is_Busy()!=0);//DMA方式专用,其他模式可省略
+				OLED_Clear_GRAM();
+				OLED_Fill_Box(0,0, x, y);
+			}while(LCD_Refresh());
+			i++;
+		}
+	}
+	delay_ms(DEMO_DELAY_MS);
+	
+	//--------------------圆角矩形-----------------------
+	{
+		uint16_t r=0;
+		while(r<SCREEN_HIGH)
+		{
+			do
+			{
+				while(LCD_is_Busy()!=0);//DMA方式专用,其他模式可省略
+				OLED_Clear_GRAM();
+				OLED_Draw_RBox(0,0,SCREEN_WIDTH-1, SCREEN_HIGH-1,r);
+			}while(LCD_Refresh());
+			r++;
+		}
+	}
+	delay_ms(DEMO_DELAY_MS);
+	{
+		uint16_t r=0;
+		while(r<SCREEN_HIGH)
+		{
+			do
+			{
+				while(LCD_is_Busy()!=0);//DMA方式专用,其他模式可省略
+				OLED_Clear_GRAM();
+				OLED_Fill_RBox(0,0,SCREEN_WIDTH-1, SCREEN_HIGH-1,r);
+			}while(LCD_Refresh());
+			r++;
+		}
+	}
+	delay_ms(DEMO_DELAY_MS);
+	//--------------------十进制数字-----------------------
+	{
+		int16_t r=-500;
+		while(r<1200)
+		{
+			do
+			{
+				while(LCD_is_Busy()!=0);//DMA方式专用,其他模式可省略
+				OLED_Clear_GRAM();
+				OLED_Draw_int32(0,0,r);//十进制带符号
+			}while(LCD_Refresh());
+			//delay_ms(5);
+			r++;
+		}
+	}
+	delay_ms(DEMO_DELAY_MS);
+	
 	//--------------------刷点驱动切换-----------------------
 	do
 	{
+		while(LCD_is_Busy()!=0);//DMA方式专用,其他模式可省略
+		
 		OLED_Set_Driver_Mode(write_1);//写1模式(普通) 白点模式
 		OLED_Clear_GRAM();
 		
@@ -301,29 +317,32 @@ void gui_demo()//刷图demo
 		OLED_Draw_UTF8_String(10,1,(uint8_t*)"Fill_RBox_ABCDEFGHIJK");
 
 	}while(LCD_Refresh());//直到每行都刷完
-//	delay_ms(800);
-//	
-//	//恢复正常的刷点模式
-//	OLED_Set_Driver_Mode(write_1);//写1模式(普通) 白点模式
+	delay_ms(800);
+	
+	//恢复正常的刷点模式
+	OLED_Set_Driver_Mode(write_1);//写1模式(普通) 白点模式
 
 
-//	//--------------------图片demo----------------------
-//	do
-//	{
-//		//1.---清空缓存---
-//		OLED_Clear_GRAM();
-//		//2.-----绘图-----
-//		
-//		OLED_Draw_Bitmap(
-//											0,    //x位置
-//											0,    //y位置
-//											128,  //图片宽
-//											64,   //图片高
-//		                  (uint8_t*)demo_bitmap_128x64 //图片数组
-//		                 );
-//		
-//	}while(LCD_Refresh());//直到每行都刷完
-//	delay_ms(DEMO_DELAY_MS);
+	//--------------------图片demo----------------------
+	do
+	{
+		//0.---等待发送完毕---
+		while(LCD_is_Busy()!=0);//DMA方式专用,其他模式可省略
+		
+		//1.---清空缓存---
+		OLED_Clear_GRAM();
+		//2.-----绘图-----
+		
+		OLED_Draw_Bitmap(
+											0,    //x位置
+											0,    //y位置
+											128,  //图片宽
+											64,   //图片高
+		                  (uint8_t*)demo_bitmap_128x64 //图片数组
+		                 );
+		
+	}while(LCD_Refresh());//直到每行都刷完
+	delay_ms(DEMO_DELAY_MS);
 
 
 }
@@ -340,16 +359,16 @@ int main(void)
 	lcd_driver_Init();
 	
 	//本框架Wegui部分为多级菜单图形动画ui,处理多级菜单,过度动画等
-	OLED_Wegui_Init();
+	//OLED_Wegui_Init();
 	
 	sys1ms_stick = 0;
 	while (1)
 	{
 		//--------------刷图DEMO---------------
-		//gui_demo();//刷图demo
+		gui_demo();//刷图demo
 		
 		//------------多级菜单DEMO-------------
-		Wegui_loop_func();//Wegui循环驱动
+		//Wegui_loop_func();//Wegui循环驱动
 		
 		//--------------主循环-----------------
 		if(sys1ms_stick)//1ms动作
