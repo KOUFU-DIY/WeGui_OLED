@@ -20,12 +20,16 @@ limitations under the License.
 
 
 /*--------------------------------------------------------------
-  * Wegui : V0.4beta
+  * Wegui : V0.4.1beta
   * Author: KOUFU
 	* https://space.bilibili.com/526926544
 	* https://github.com/KOUFU-DIY/WeGui_OLED
 ----------------------------------------------------------------*/
 /*--------------------------------------------------------------
+  * 版本更新 : V0.4.1
+	* 1.修复DMA工作模式的一些问题
+	* 2.修复局部显存模式中,无法使用"高级驱动"的问题
+	
   * 版本更新 : V0.4beta
 	* 1.增加自定义显存工作模式, 大幅减少大屏得RAM占用
 	* 2.修复在优化等级高的时候容易出现的刷屏错位问题
@@ -88,7 +92,7 @@ limitations under the License.
 #define _DMA_4SPI   (3)//DMA四线SPI驱动   对应文件stm32f103_lcd_dma_4spi_port.c(暂不支持动态刷新)
 #define _SOFT_IIC   (4)//软件IIC驱动(推荐) 对应文件stm32f103_lcd_soft_iic_port.c 
 #define _HARD_IIC   (5)//硬件IIC驱动(不推荐) 对应文件stm32f103_lcd_hard_iic_port.c (应答等存在问题暂未解决)
-#define LCD_PORT    _HARD_IIC//选择一个接口
+#define LCD_PORT    _SOFT_IIC//选择一个接口
 
 
 
@@ -105,7 +109,7 @@ limitations under the License.
 #if ((LCD_PORT == _HARD_4SPI) || (LCD_PORT == _DMA_4SPI))
 //STM32F103手册指定SPI最高设置18MHz 但也支持超频
 #define RCC_HCLK_Divx            RCC_HCLK_Div2 //HCLK时钟分频1,2,4,8,16
-#define SPI_BaudRatePrescaler_x  SPI_BaudRatePrescaler_2 //SPI分频2,4,8,16,32,64,128,256
+#define SPI_BaudRatePrescaler_x  SPI_BaudRatePrescaler_4 //SPI分频2,4,8,16,32,64,128,256
 #endif
 
 
@@ -115,7 +119,7 @@ limitations under the License.
 #define _PAGE_BUFF_FULL_UPDATE (2) //页缓存 全屏刷新(更低的内存占用)[暂不支持上位机串流和截屏]
 #define _PAGE_BUFF_DYNA_UPDATE (3) //页缓存 动态刷新(更低的内存占用,建议使用)[暂不支持上位机串流和截屏]
 
-#define LCD_MODE    _FULL_BUFF_DYNA_UPDATE //选择一个刷屏模式
+#define LCD_MODE    _FULL_BUFF_FULL_UPDATE //选择一个刷屏模式
 
 //-------------------------3.2.选择刷屏缓存页大小--------------------------------
 //仅页缓存模式需要设置
@@ -149,7 +153,7 @@ limitations under the License.
 #define _SSD1309   (5)//普通点阵OLED 
 #define _SSD1312   (6)//普通点阵OLED
 #define _SSD1315   (7)//普通点阵OLED
-#define _SSD1327   (8)//灰度OLED
+#define _SSD1327   (8)//4阶灰度OLED
 #define _ST7735    (9)//TFT彩屏 RGB565
 #define _ST7789VW (10)//TFT彩屏 RGB565
 #define _ST7796S  (11)//TFT彩屏 RGB565
