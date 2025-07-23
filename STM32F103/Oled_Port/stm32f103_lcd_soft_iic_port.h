@@ -86,7 +86,6 @@ do{\
 	}while(0)
 
 	
-	
 #define LCD_is_Busy() (0)
 void LCD_delay_ms(volatile uint32_t ms);
 void LCD_Send_1Cmd(uint8_t dat);//向屏幕发送1个命令
