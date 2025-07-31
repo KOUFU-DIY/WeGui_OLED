@@ -343,7 +343,7 @@ uint8_t LCD_Refresh(void)
 	{
 		uint32_t i_crc;
 		//判断屏幕是否已刷完
-		if(lcd_driver.lcd_refresh_ypage + ypage > ((SCREEN_HIGH+7)/8)-1)
+		if((lcd_driver.lcd_refresh_ypage + ypage)>=((SCREEN_HIGH+7)/8))
 		{
 			break;
 		}
@@ -471,7 +471,10 @@ uint8_t LCD_Refresh(void)
 	for(ypage=0;ypage<GRAM_YPAGE_NUM;ypage++)
 	{
 		uint32_t i_sum1;
-		
+		if((lcd_driver.lcd_refresh_ypage + ypage)>=((SCREEN_HIGH+7)/8))
+		{
+			break;
+		}
 		//-----方式1:CRC算法校验-----
 		CRC->CR = CRC_CR_RESET;//CRC_ResetDR();
 		for(x=0;x<SCREEN_WIDTH;x++)

@@ -389,13 +389,13 @@ uint8_t LCD_Refresh(void)
 	//每page做校验,若校验码没变,则不刷新该page
 	static uint32_t crc[((SCREEN_HIGH+7)/8)];
 	unsigned char ypage,x;
-
+	
 	for(ypage=0;ypage<GRAM_YPAGE_NUM;ypage++)
 	{
 		uint32_t i_crc;
 
 		//判断屏幕是否已刷完
-		if(lcd_driver.lcd_refresh_ypage + ypage > ((SCREEN_HIGH+7)/8)-1)
+		if((lcd_driver.lcd_refresh_ypage + ypage)>=((SCREEN_HIGH+7)/8))
 		{
 			break;
 		}
@@ -496,7 +496,10 @@ uint8_t LCD_Refresh(void)
 	for(ypage=0;ypage<GRAM_YPAGE_NUM;ypage++)
 	{
 		uint32_t i_sum1;
-		
+		if((lcd_driver.lcd_refresh_ypage + ypage)>=((SCREEN_HIGH+7)/8))
+		{
+			break;
+		}
 		//-----方式1:CRC算法校验-----
 		CRC->CR = CRC_CR_RESET;//CRC_ResetDR();
 		for(x=0;x<SCREEN_WIDTH;x++)
@@ -504,15 +507,6 @@ uint8_t LCD_Refresh(void)
 			CRC->DR = lcd_driver.LCD_GRAM[ypage][x];//CRC_CalcCRC(lcd_driver.LCD_GRAM[ypage][x]);
 		}
 		i_sum1 = CRC->DR;//i_sum1 = CRC_GetCRC();
-		//---------------------------
-		
-		
-		//-----方式2:累加乘积校验-----
-//		i_sum1 = 0;
-//		for(x=0;x<SCREEN_WIDTH;x++)
-//		{
-//			i_sum1 = i_sum1 + (uint32_t)lcd_driver.LCD_GRAM[ypage][x]*x;
-//		}
 		//---------------------------
 		
 		if(sum1[ypage] != i_sum1)
@@ -553,7 +547,6 @@ uint8_t LCD_Refresh(void)
 	return 0;
 }
 #elif (LCD_MODE == _PAGE_BUFF_FULL_UPDATE)
-//---------方式3:页缓存全屏刷新----------
 //---------方式3:页缓存全屏刷新----------
 uint8_t LCD_Refresh(void)
 {
@@ -608,7 +601,10 @@ uint8_t LCD_Refresh(void)
 	for(ypage=0;ypage<GRAM_YPAGE_NUM;ypage++)
 	{
 		uint32_t i_crc;
-
+		if((lcd_driver.lcd_refresh_ypage + ypage)>=((SCREEN_HIGH+7)/8))
+		{
+			break;
+		}
 		//-----方式1:CRC算法校验-----
 		CRC->CR = CRC_CR_RESET;//CRC_ResetDR();
 		for(x=0;x<SCREEN_WIDTH;x++)
