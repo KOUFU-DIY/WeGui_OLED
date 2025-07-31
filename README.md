@@ -2,6 +2,17 @@
 
 企鹅交流群:787475855
 
+V0.4.3
+
+修复页缓存不对齐情况下动态刷新数据溢出问题!(重要更新)
+
+V0.4.2
+
+1.修复TFT宽度大于255像素时刷屏错误的问题
+
+2.菜单进退时的一些问题
+
+![7ac66872501286051f33cc6fbf6addaf](https://github.com/user-attachments/assets/b601bc3d-4258-4ca8-a941-43b985cb5493)
 
 V0.4.1
 
@@ -22,7 +33,6 @@ V0.４Beta
 
 5.主函数里增加了简易图形demo,可自行打开测试
 
-![7ac66872501286051f33cc6fbf6addaf](https://github.com/user-attachments/assets/b601bc3d-4258-4ca8-a941-43b985cb5493)
 
 
 V0.3Beta
