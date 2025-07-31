@@ -75,7 +75,7 @@ void Wegui_show_mList(uint16_t farmes)
 		//Value_Change_PID_P(cur_value,target_value,P,count)
 		Value_Change_PID_P( mList_par.list_animation_temp_y,
 												(SCREEN_HIGH-1+SCREEN_HIGH/8),
-												(4),
+												(3),
 		                    //(13 - SCREEN_HIGH/36+1),//控制菜单下拉速度[1最快:16最慢]
 												farmes);
 		

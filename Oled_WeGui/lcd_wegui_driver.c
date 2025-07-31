@@ -19,16 +19,8 @@ limitations under the License.
 #include "lcd_wegui_menu_mlist.h"
 #include "lcd_wegui_tip.h"
 
-
-
-	
 uint16_t Wegui_stick=0;
 Wegui_t Wegui;
-
-
-
-
-
 
 /*--------------------------------------------------------------
   * 名称: *itoa(int16_t num,uint8_t *str,uint8_t radix)
@@ -127,18 +119,6 @@ void Wegui_enter_menu(menu_t* p)
 {
 		switch(p->menuType)
 		{
-			case wSlider:
-			{
-				Wegui_Push_Slider_tip		(8, //Y位置
-																Wegui_get_string(p->titel,Wegui.setting.langauge), //标题
-																p->menuPar.wSliderTip_Par.pstr, //参数指针
-																p->menuPar.wSliderTip_Par.min ,//最小值
-																p->menuPar.wSliderTip_Par.max,//最大值
-																VALUE_CHANGE_AND_UPDATE,//实时更新值
-																p->menuPar.wSliderTip_Par.Change_Value_func,//改变数值执行的函数的指针
-																p->menuPar.wSliderTip_Par.End_tip_func);//确定数值执行的函数的指针
-			}break;
-			
 			case mList:
 			{
 				if(p==0x00){mList_par.cursor_id=0;mList_par.list_y_offset_target=0;return;}//没有菜单
@@ -154,10 +134,12 @@ void Wegui_enter_menu(menu_t* p)
 					}break;
 					default:break;
 				}
-				Wegui.menu = p;
-				Wegui_mList_Init();
+				
 				if(Wegui.menu->menuPar.mList_Par.quit_fun!=0x00)
 					Wegui.menu->menuPar.mList_Par.quit_fun();//执行函数
+				
+				Wegui.menu = p;//进入新的菜单
+				Wegui_mList_Init();
 				
 				if(Wegui.menu->menuPar.mList_Par.begin_fun!=0x00)
 					Wegui.menu->menuPar.mList_Par.begin_fun();//执行函数
@@ -176,9 +158,10 @@ void Wegui_enter_menu(menu_t* p)
 					default:break;
 				}
 				
-				Wegui.menu = p;
 				if(Wegui.menu->menuPar.mList_Par.quit_fun!=0x00)
 					Wegui.menu->menuPar.mList_Par.quit_fun();//执行函数
+				
+				Wegui.menu = p;//进入新的APP
 				
 				if(Wegui.menu->menuPar.mList_Par.begin_fun!=0x00)
 					Wegui.menu->menuPar.mList_Par.begin_fun();//执行函数
@@ -191,10 +174,20 @@ void Wegui_enter_menu(menu_t* p)
 				}
 				Wegui_Push_Message_tip(8, Wegui_get_string(p->menuPar.wMessage_Par.Tip_string,Wegui.setting.langauge), 3000);//推送提示信息, (推送y位置, 提示内容字符串, 展示时间ms)
 			}break;
+			case wSlider:
+			{
+				Wegui_Push_Slider_tip		(8, //Y位置
+																Wegui_get_string(p->titel,Wegui.setting.langauge), //标题
+																p->menuPar.wSliderTip_Par.pstr, //参数指针
+																p->menuPar.wSliderTip_Par.min ,//最小值
+																p->menuPar.wSliderTip_Par.max,//最大值
+																VALUE_CHANGE_AND_UPDATE,//实时更新值
+																p->menuPar.wSliderTip_Par.Change_Value_func,//改变数值执行的函数的指针
+																p->menuPar.wSliderTip_Par.End_tip_func);//确定数值执行的函数的指针
+			}break;
 			default:break;
 		}
 }
-
 
 //刷新屏幕帧率
 static void Reflash_fps(uint16_t stick)
@@ -349,7 +342,6 @@ void Wegui_loop_func()
 			m_wDemo_wMessage_ADC_func();//持续刷新显示的ADC值
 			//------------------屏幕刷新前自定义的操作---------------------
 			
-			//OLED_Clear_GRAM();
 			
 			//------------------------开始刷屏--------------------------
 			do
@@ -357,7 +349,6 @@ void Wegui_loop_func()
 				//--------------------绘制对应菜单------------------------
 				switch (Wegui.menu->menuType)
 				{
-					
 					case mPorgram:  //自定义功能APP菜单
 					{
 						if(Wegui.menu->menuPar.mPorgram_Par.refresh_fun != 0x00)
@@ -365,9 +356,9 @@ void Wegui_loop_func()
 							Wegui.menu->menuPar.mPorgram_Par.refresh_fun();
 						}
 					}break;
-					case wCheckBox: //控件:复选框菜单
+					case wCheckBox: //控件:复选框菜单(不会进入)
 						break;
-					case wSlider:   //控件:滑条菜单
+					case wSlider:   //控件:滑条菜单(不会进入)
 						break;
 					default:
 					case mList:     //列表菜单菜单
@@ -397,9 +388,7 @@ void Wegui_loop_func()
 				fps_time_count %= SCREEN_REFRESH_TIME_MS;
 				i = fps_time_count;
 			}
-			
 		}
-
 	}
 
 	

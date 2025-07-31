@@ -491,7 +491,8 @@ uint8_t LCD_Refresh(void)
 {
 	//每page做校验,若校验码没变,则不刷新该page
 	static uint32_t sum1[GRAM_YPAGE_NUM];
-	unsigned char ypage,x,ycount;
+	uint8_t ypage,ycount;
+	uint16_t x;
 	for(ypage=0;ypage<GRAM_YPAGE_NUM;ypage++)
 	{
 		uint32_t i_sum1;
@@ -601,7 +602,8 @@ uint8_t LCD_Refresh(void)
 {
 	//每page做校验,若校验码没变,则不刷新该page
 	static uint32_t crc[((SCREEN_HIGH+7)/8)];
-	unsigned char ypage,x,ycount;
+	uint8_t ypage,ycount;
+	uint16_t x;
 
 	for(ypage=0;ypage<GRAM_YPAGE_NUM;ypage++)
 	{

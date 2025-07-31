@@ -359,16 +359,16 @@ int main(void)
 	lcd_driver_Init();
 	
 	//本框架Wegui部分为多级菜单图形动画ui,处理多级菜单,过度动画等
-	//OLED_Wegui_Init();
+	OLED_Wegui_Init();
 	
 	sys1ms_stick = 0;
 	while (1)
 	{
 		//--------------刷图DEMO---------------
-		gui_demo();//刷图demo
+		//gui_demo();//刷图demo
 		
 		//------------多级菜单DEMO-------------
-		//Wegui_loop_func();//Wegui循环驱动
+		Wegui_loop_func();//Wegui循环驱动
 		
 		//--------------主循环-----------------
 		if(sys1ms_stick)//1ms动作
