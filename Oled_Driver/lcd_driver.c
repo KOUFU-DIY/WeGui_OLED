@@ -483,80 +483,6 @@ void OLED_Draw_Line(int16_t x1,int16_t y1,int16_t x2,int16_t y2)
 }
 
 
-//void OLED_DMA_4SPI_Int()
-//{
-//	dma_flag_clear(DMA0, DMA_CH2, DMA_INTF_GIF);//清除完成标志其中包括TFT
-//	if(dma_OLED_page>((SCREEN_HIGH-1)/8))
-//	{
-//		//执行发送命令任务
-//		if(b_dma_send_cmd)
-//		{
-//			b_dma_send_cmd = 0;//1:通知DMA将要发送命令,正在安排发送 0:没有发送任务
-//			dma_channel_disable(DMA0, DMA_CH2);//关闭DMA才能调整参数
-//			while(spi_i2s_flag_get(OLED_SPIx,SPI_FLAG_TRANS)){}//DMA完成不代表SPI发送完成
-//			IO_DC_Output_0();
-//			dma_transfer_number_config(DMA0, DMA_CH2 , OLED_dma_cmd_num);//发送数量
-//			dma_memory_address_config(DMA0, DMA_CH2, (uint32_t)p_OLED_dma_cmd);//发送数据的起始地址
-//			dma_channel_enable(DMA0, DMA_CH2);
-//		}
-//		else
-//		{
-//			OLED_dma_cmd_num = 0;
-//			OLED_dma_busy=0;
-//		}
-//		return;
-//	}
-//	
-//	dma_channel_disable(DMA0, DMA_CH2);//关闭DMA才能调整参数
-//	if(dma_dma_OLED_page_setted==0)
-//	{
-//		//发送命令
-//		
-//		#if (OLED_IC==SSD1309)
-//		static uint8_t cmd_set_page[]={0xb0,0x00,0x10};
-//		cmd_set_page[0]=0xb0+dma_OLED_page;
-//		IO_DC_Output_0();
-//		dma_transfer_number_config(DMA0, DMA_CH2 , sizeof(cmd_set_page));//发送数量
-//		dma_memory_address_config(DMA0, DMA_CH2, (uint32_t)cmd_set_page);//发送数据的起始地址
-//		dma_dma_OLED_page_setted=0xff;
-//		
-//		#elif (OLED_IC==SH1108)
-//		static uint8_t cmd_set_page[]={0xb0,0x00,0x00,0x11};
-//		cmd_set_page[1]=dma_OLED_page;
-//		IO_DC_Output_0();
-//		dma_transfer_number_config(DMA0, DMA_CH2 , sizeof(cmd_set_page));//发送数量
-//		dma_memory_address_config(DMA0, DMA_CH2, (uint32_t)cmd_set_page);//发送数据的起始地址
-//		dma_dma_OLED_page_setted=0xff;
-//		
-//		#else
-//			#error "OLED_IC_NOT_SUPPORTED!"
-//		#endif
-//	}
-//	else
-//	{
-//		//发送数据(屏幕内容)
-//		
-//		/*
-//		//IC支持页自增的效率模式 仅发现ssd1306 SSD1327可以
-//		IO_DC_Output_1();
-//		dma_transfer_number_config(DMA0, DMA_CH2 , SCREEN_WIDTH*SCREEN_HIGH);//发送数量
-//		dma_memory_address_config(DMA0, DMA_CH2, (uint32_t)LCD_GRAM);//发送数据的起始地址
-//		dma_OLED_page=0xFF;
-//		dma_dma_OLED_page_setted=0;
-//		*/
-//			
-//		//IC不支持页自增的低效率模式, 刷新一页就执行一次
-//		IO_DC_Output_1();
-//		dma_transfer_number_config(DMA0, DMA_CH2 , SCREEN_WIDTH);//发送数量
-//		dma_memory_address_config(DMA0, DMA_CH2, (uint32_t)LCD_GRAM+SCREEN_WIDTH*dma_OLED_page);//发送数据的起始地址
-//		dma_OLED_page++;
-//		dma_dma_OLED_page_setted=0;
-//			
-//	}
-//	while(spi_i2s_flag_get(OLED_SPIx,SPI_FLAG_TRANS)){}//DMA完成不代表SPI发送完成
-//	dma_channel_enable(DMA0, DMA_CH2);
-//}
-
 /*--------------------------------------------------------------
   * OLED_Draw_Circel_part(int16_t x0,int16_t y0,uint8_t r,circle_part_t cPart)
   * 传入: (x0,y0):起点  r:半径 cPart:圆的部分
@@ -1154,42 +1080,6 @@ void OLED_Draw_int32(int16_t x,int16_t y,int16_t num)
 }
 
 
-
-//void OLED_Draw_Num_length(int16_t x,int16_t y,uint32_t num, uint8_t len)//写数字,固定长度,不带符号,左对齐
-//{
-//	uint8_t  i=0;
-//	uint32_t sum=1;
-//	if(num == 0)
-//	{
-//		OLED_Draw_Ascii(x,y,'0');
-//	}
-//	else if(num == 1)
-//	{
-//		OLED_Draw_Ascii(x,y,'1');
-//	}
-//	else
-//	{
-//		while(sum<=num)
-//		{
-//			sum = sum*10;
-//		}
-//		while((sum>1)&&(len>0))
-//		{
-//			sum=sum/10;
-//			OLED_Draw_Bitmap(x,y,Wegui_font.fonts_ascii_Width,Wegui_font.fonts_ascii_High,(uint8_t*)Wegui_font.p_fonts_ascii+Wegui_font.fonts_ascii_size*(num/sum + '0'-0x20));
-//			x += Wegui_font.fonts_ascii_Width + Wegui_font.fonts_ascii_scape;
-//			num = (unsigned int16_t)num % sum;
-//			len--;
-//		}
-//	}
-//	while(len)
-//	{
-//		OLED_Draw_Ascii(x,y,' ');
-//		x += Wegui_font.fonts_ascii_Width + Wegui_font.fonts_ascii_scape;
-//		len--;
-//	}
-//}
-
 /*--------------------------------------------------------------
   * 名称: void OLED_Draw_Unicode(int16_t x,int16_t y,unicode_t unicode_id)
   * 传入: (x,y)左上角坐标 unicode_id
@@ -1455,85 +1345,6 @@ uint16_t OLED_Get_UTF8_YLine(uint8_t *p)
 	return line;
 }
 
-
-
-//void OLED_Draw_UTF8_Auto_NewLine(int16_t x,int16_t y,uint8_t *p)
-//{
-//	int16_t x_0 = x;
-//	while(*p!=0x00)
-//	{
-//		uint8_t temp = *p & 0xF8;
-//		if(temp<=0x7F)//单字节
-//		//if(temp < 0xC0)	
-//		{
-//			//单字节均是ASCII
-//			if(*p == '\r')
-//			{
-//				x = x_0;
-//				y += Wegui_font.text_new_line_dist;
-//				p+=1;
-//				if(*p == '\n'){p+=1;}
-//			}
-//			else if(*p == '\n')
-//			{
-//				x = x_0;
-//				y += Wegui_font.text_new_line_dist;
-//				p+=1;
-//			}
-//			else
-//			{
-//				//自动判断换行
-//				if((SCREEN_WIDTH-1-Wegui_font.fonts_ascii_Width)<x)
-//				{
-//					x = x_0;
-//					y += Wegui_font.text_new_line_dist;
-//				}
-//				
-//				OLED_Draw_Ascii(x,y,*p);
-//				x += Wegui_font.fonts_ascii_Width + Wegui_font.fonts_ascii_scape;
-//				p+=1;
-//			}
-//		}
-//		else if(temp < 0xE0)//双字节
-//		{
-//			//双字节好像都是符号
-//			/*
-//			u16_u8_t unicode_id;
-//			unicode_id.u8[0]=(*p<<3)|((*(p+1)>>3)&0x07);
-//			unicode_id.u8[1]=(*(p+1)&0x07);
-//			OLED_Draw_Chinese(x,y,unicode_id);
-//			x += Wegui_font.fonts_HZ_With + Wegui_font.fonts_HZ_scape;
-//			*/
-//			p+=2;
-//		}
-//		else if(temp < 0xF0)//三字节
-//		{
-//			//三字节都是中文
-//			u16_u8_t unicode_id;
-//			unicode_id.u8[0]=(*p<<4)|((*(p+1)>>2)&0x0F);
-//			unicode_id.u8[1]=(*(p+1)<<6)|((*(p+2))&0x3F);
-//			
-//			//自动判断换行
-//			if((SCREEN_WIDTH-1-Wegui_font.fonts_ascii_Width)<x)
-//			{
-//				x = x_0;
-//				y += Wegui_font.text_new_line_dist;
-//			}
-//				
-//			OLED_Draw_Chinese(x,y,unicode_id);
-//			x += Wegui_font.fonts_HZ_With + Wegui_font.fonts_HZ_scape;
-//			p+=3;
-//		}
-//		else//四字节
-//		{
-//			p+=4;
-//		}
-//	}
-//}
-///*
-
-
-
 /*--------------------------------------------------------------
   * 名称: OLED_Fill_value_GRAM(uint8_t value)
   * 功能: 将value值依次完整填充到显存LCD_GRAM
@@ -1583,10 +1394,8 @@ void lcd_driver_Init(void)
 	LCD_Port_Init();
 	LCD_IC_Init();
 	
-	
 	//------driver配置默认字体---------
 	//---中英文字体high高度需要一致----
-	
 	
 	//lcd_driver.fonts_ASCII = &ascii_SongTi_8X16;//默认ASCII字体
 	//lcd_driver.fonts_UTF8_cut = &SongTi_UTF8_16X16;//默认UTF8字体(裁切)
