@@ -333,7 +333,7 @@ void Wegui_show_tip(uint16_t farmes, uint16_t Tms)
 																Wegui.tip.cur_x  + BAR_TIP_SIDE_SCAPE + (BAR_WIDTH*(Wegui.tip.show_Value-Wegui.tip.pvalue_min)/(Wegui.tip.pvalue_max-Wegui.tip.pvalue_min)),
 																Wegui.tip.cur_y + Wegui.tip.fonts_high*string_yline + BAR_TIP_TOP_SCAPE + BAR_TO_CHAR_SCAPE + BAR_HIGHT,
 																2);
-					uint8_t string[6];
+					uint8_t string[7];
 					itoa(Wegui.tip.show_Value,string,10);//数值转10进制字符串, 传递回给字符串指针
 					
 					OLED_Draw_UTF8_String	(Wegui.tip.cur_x + BAR_TIP_SIDE_SCAPE,

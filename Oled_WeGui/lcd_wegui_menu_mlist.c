@@ -152,7 +152,7 @@ void Wegui_show_mList(uint16_t farmes)
 				{
 						if(p->menuPar.wSliderTip_Par.pstr != 0x00)
 						{
-							uint8_t str[5];
+							uint8_t str[7];
 							itoa(*p->menuPar.wSliderTip_Par.pstr,str,10);//数值转10进制字符串, 传递回给字符串指针			
 							OLED_Draw_UTF8_String	(SCREEN_WIDTH - 1 - OLED_Get_UTF8_XLen(str) -2,
 															temp_y,
