@@ -460,7 +460,7 @@ void OLED_Draw_Line(int16_t x1,int16_t y1,int16_t x2,int16_t y2)
 		OLED_Draw_HLine(x1,y1,x2);//高效率绘制水平线
 		return;
 	}
-	else {incy=-1;delta_y=-delta_x;}
+	else {incy=-1;delta_y=-delta_y;}
 	if(delta_x>delta_y)distance=delta_x; //选取基本增量坐标轴 
 	else distance=delta_y;
 	for(t=0;t<distance+1;t++)
