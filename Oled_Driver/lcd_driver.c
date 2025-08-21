@@ -461,7 +461,11 @@ void OLED_Draw_Line(int16_t x1,int16_t y1,int16_t x2,int16_t y2)
 		return;
 	}
 	else {incy=-1;delta_y=-delta_y;}
+<<<<<<< HEAD
 	if(delta_x>delta_y)distance=delta_x; //选取基本增量坐标轴
+=======
+	if(delta_x>delta_y)distance=delta_x; //选取基本增量坐标轴 
+>>>>>>> da596ed4efb481c58fed7b7e4ee57acf214e157a
 	else distance=delta_y;
 	for(t=0;t<distance+1;t++)
 	{
