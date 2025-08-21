@@ -168,7 +168,7 @@ limitations under the License.
 #define _GC9A01   (12)//TFT彩屏 RGB565 (未完善)
 //#define _ILI9488  (13)//TFT彩屏 RGB111 RGB888 暂不支持
 
-#define LCD_IC _ST7735 //选择一个屏幕IC型号
+#define LCD_IC _SSD1306 //选择一个屏幕IC型号
 
 
 //----------------------------7.1设定彩屏---------------------------------

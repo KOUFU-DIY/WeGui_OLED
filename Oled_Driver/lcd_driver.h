@@ -18,7 +18,7 @@ limitations under the License.
 #define _LCD_DRIVER_H_
 
 #include "stdint.h"
-#include "lcd_wegui_Config.h"
+#include "lcd_wegui_config.h"
 #include "lcd_res.h"
 
 
@@ -42,17 +42,17 @@ typedef enum circle_part
 	C_DL = 0x20,//下左八分之一圆
 	C_DR = 0x40,//下右八分之一圆
 	C_RD = 0x80,//右下八分之一圆
-	
+
 	C_HL = C_UL | C_LU | C_LD | C_DL ,//左半圆
 	C_HR = C_UR | C_RU | C_RD | C_DR ,//右半圆
 	C_HU = C_RU | C_UR | C_UL | C_LU ,//上半圆
 	C_HD = C_LD | C_DL | C_DR | C_RD ,//下半圆
-	
+
 	C_QLU = C_UL | C_LU,//左上角四分圆
 	C_QLD = C_LD | C_DL,//左下角四分圆
 	C_QRU = C_UR | C_RU,//右上角四分圆
 	C_QRD = C_DR | C_RD,//右下角四分圆
-	
+
 	C_ALL = 0xFF,//完整的园
 
 }circle_part_t;
@@ -219,7 +219,7 @@ void OLED_Draw_Unicode(int16_t x,int16_t y,unicode_t unicode_id);
   * 功能: 在指定坐标上按照系统设定字体格式绘制字符串
 ----------------------------------------------------------------*/
 void OLED_Draw_UTF8_String(int16_t x,int16_t y,uint8_t *p);
-	
+
 /*--------------------------------------------------------------
   * 名称: uint16_t OLED_Get_UTF8_XLen(uint8_t *p)
   * 传入: *p字符串指针
@@ -250,7 +250,7 @@ void OLED_Clear_GRAM(void);
   * 名称: lcd_driver_Init()
   * 功能: 驱动初始化
 ----------------------------------------------------------------*/
-void lcd_driver_Init(void);
+void lcd_driver_init(void);
 
 
 

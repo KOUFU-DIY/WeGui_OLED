@@ -54,14 +54,14 @@ void m_wDemo_wMessage_ADC_func()//菜单实时更新ADC值
 {
 	static uint8_t string[7];
 	
-	itoa(ResADC,string,10);
+	my_itoa(ResADC,string,10);
 	m_wDemo_wMessage_ADC.menuPar.wMessage_Par.Value_string = string;
 }
 void m_wDemo_wMessage_Pres_func()//菜单按下弹窗
 {
 	static uint8_t string[7];
 	
-	itoa(ResADC,string,10);
+	my_itoa(ResADC,string,10);
 	m_wDemo_wMessage_Pres.menuPar.wMessage_Par.Value_string = string;
 }
 void m_wDemo_wMessage_Pres2_func()//菜单按下更换文字

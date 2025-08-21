@@ -846,11 +846,6 @@
           <GroupName>Oled_Port</GroupName>
           <Files>
             <File>
-              <FileName>lcd_wegui_Config.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Oled_Port\lcd_wegui_Config.h</FilePath>
-            </File>
-            <File>
               <FileName>stm32f103_lcd_dma_4spi_port.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Oled_Port\stm32f103_lcd_dma_4spi_port.c</FilePath>

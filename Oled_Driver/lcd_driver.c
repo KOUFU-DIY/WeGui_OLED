@@ -49,7 +49,7 @@ static void lcd_driver_Write_0(uint16_t x,uint16_t ypage,uint8_t u8_value)
 		lcd_driver.LCD_GRAM[ypage%GRAM_YPAGE_NUM][x] &= (~u8_value);
 	}
 	#endif
-	
+
 }
 /*--------------------------------------------------------------
   * 名称: lcd_driver_Write_1(uint16_t x,uint16_t ypage,uint8_t u8_value)
@@ -67,7 +67,7 @@ static void lcd_driver_Write_1(uint16_t x,uint16_t ypage,uint8_t u8_value)
 		lcd_driver.LCD_GRAM[ypage%GRAM_YPAGE_NUM][x] |= u8_value;
 	}
 	#endif
-	
+
 }
 /*--------------------------------------------------------------
   * 名称: lcd_driver_Write_inv(uint16_t x,uint16_t ypage,uint8_t u8_value)
@@ -96,13 +96,13 @@ static void lcd_driver_Write_0_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
 		return;
 	if((ypage<lcd_driver.Box.ypage_min)||(ypage>lcd_driver.Box.ypage_max))
 		return;
-	
+
 	if(ypage == lcd_driver.Box.ypage_min_temp)
 		u8_value = u8_value & lcd_driver.Box.ypage_min_temp;
 	if(ypage == lcd_driver.Box.ypage_max_temp)
 		u8_value = u8_value & lcd_driver.Box.ypage_max_temp;
-	
-	
+
+
 	//---------全屏缓存-----------
 	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	lcd_driver.LCD_GRAM[ypage][x] &= (~u8_value);
@@ -113,7 +113,7 @@ static void lcd_driver_Write_0_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
 		lcd_driver.LCD_GRAM[ypage%GRAM_YPAGE_NUM][x] &= (~u8_value);
 	}
 	#endif
-	
+
 }
 /*--------------------------------------------------------------
   * 名称: lcd_driver_Write_1_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
@@ -125,14 +125,14 @@ static void lcd_driver_Write_1_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
 		return;
 	if((ypage<lcd_driver.Box.ypage_min)||(ypage>lcd_driver.Box.ypage_max))
 		return;
-	
+
 	if(ypage == lcd_driver.Box.ypage_min)
 		u8_value = u8_value & lcd_driver.Box.ypage_min_temp;
 	if(ypage == lcd_driver.Box.ypage_max)
 		u8_value = u8_value & lcd_driver.Box.ypage_max_temp;
 	if(u8_value == 0x00)
 		return;
-	
+
 	//---------全屏缓存-----------
 	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	lcd_driver.LCD_GRAM[ypage][x] |= u8_value;
@@ -143,7 +143,7 @@ static void lcd_driver_Write_1_inBox(uint16_t x,uint16_t ypage,uint8_t u8_value)
 		lcd_driver.LCD_GRAM[ypage%GRAM_YPAGE_NUM][x] |= u8_value;
 	}
 	#endif
-	
+
 }
 
 /*--------------------------------------------------------------
@@ -156,15 +156,15 @@ static void lcd_driver_Write_inv_inBox(uint16_t x,uint16_t ypage,uint8_t u8_valu
 		return;
 	if((ypage<lcd_driver.Box.ypage_min)||(ypage>lcd_driver.Box.ypage_max))
 		return;
-	
+
 	if(ypage == lcd_driver.Box.ypage_min)
 		u8_value = u8_value & lcd_driver.Box.ypage_min_temp;
 	if(ypage == lcd_driver.Box.ypage_max)
 		u8_value = u8_value & lcd_driver.Box.ypage_max_temp;
 	if(u8_value == 0x00)
 		return;
-	
-	
+
+
 	//---------全屏缓存-----------
 	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	lcd_driver.LCD_GRAM[ypage][x] ^= u8_value;
@@ -206,7 +206,7 @@ void OLED_Set_Driver_Mode(lcd_driver_mode_t mode)
 		case write_1_inBox:				//(高级)限制区域内写1
 			lcd_driver.Write_GRAM = lcd_driver_Write_1_inBox;
 			lcd_driver.Clear_GRAM = lcd_driver_Write_0_inBox;
-			break;							
+			break;
 		case write_inverse_inBox:	//(高级)限制区域内反转
 			lcd_driver.Write_GRAM = lcd_driver_Write_inv_inBox;
 			lcd_driver.Clear_GRAM = lcd_driver_Write_inv_inBox;
@@ -231,7 +231,7 @@ void OLED_Set_Driver_Box(uint16_t x_min ,uint16_t y_min ,uint16_t x_max,uint16_t
 	lcd_driver.Box.x_max = x_max;
 	lcd_driver.Box.ypage_min = y_min/8;
 	lcd_driver.Box.ypage_max = y_max/8;
-	
+
 	y_min =  8 - y_min%8;
 	lcd_driver.Box.ypage_min_temp = 0;
 	while (y_min--)
@@ -241,7 +241,7 @@ void OLED_Set_Driver_Box(uint16_t x_min ,uint16_t y_min ,uint16_t x_max,uint16_t
 	}
 	y_max = y_max%8;
 	lcd_driver.Box.ypage_max_temp = 0;
-	
+
 	while (y_max--)
 	{
 		lcd_driver.Box.ypage_max_temp = lcd_driver.Box.ypage_max_temp <<1;
@@ -272,7 +272,7 @@ static void OLED_Draw_One_Byte(int16_t x,volatile int16_t y,uint8_t u8_page)
 		return;
 	}
 	#endif
-	
+
 	if (y>=0)
 	{
 		uint8_t start_page  = y/8;
@@ -315,19 +315,19 @@ static void OLED_Draw_VLine(int16_t x,int16_t y_min, int16_t y_max)
 	uint8_t offset;
 	uint8_t ypage;
 	uint8_t i;
-	
+
 	if((x<0)||(x>=SCREEN_WIDTH))
 	{
 		return;
 	}
-	
+
 	if(y_max < y_min)
 	{
 		int16_t temp = y_min;
 		y_min = y_max;
 		y_max = temp;
 	}
-	
+
 	if((y_max < 0) ||(y_min > SCREEN_HIGH))
 	{
 		return;
@@ -341,7 +341,7 @@ static void OLED_Draw_VLine(int16_t x,int16_t y_min, int16_t y_max)
 	{
 		y_max = SCREEN_HIGH-1;
 	}
-	
+
 	ypage   = y_min / 8;
 	offset = y_min % 8;
 	//处理第一ypage
@@ -394,19 +394,19 @@ static void OLED_Draw_HLine(int16_t x_min ,int16_t y, int16_t x_max)
 {
 	uint8_t offset;
 	uint8_t ypage;
-	
+
 	if((y<0)||(y>=SCREEN_HIGH))
 	{
 		return;
 	}
-	
+
 	if(x_max < x_min)
 	{
 		int16_t temp = x_min;
 		x_min = x_max;
 		x_max = temp;
 	}
-	
+
 	if((x_max < 0) ||(x_min > SCREEN_WIDTH))
 	{
 		return;
@@ -420,10 +420,10 @@ static void OLED_Draw_HLine(int16_t x_min ,int16_t y, int16_t x_max)
 	{
 		x_max = SCREEN_WIDTH-1;
 	}
-	
+
 	ypage   = y / 8;
 	offset = 0x01 << (y % 8);
-	
+
 	while(x_min<=x_max)
 	{
 		lcd_driver.Write_GRAM(x_min,ypage,offset);
@@ -440,28 +440,28 @@ static void OLED_Draw_HLine(int16_t x_min ,int16_t y, int16_t x_max)
 ----------------------------------------------------------------*/
 void OLED_Draw_Line(int16_t x1,int16_t y1,int16_t x2,int16_t y2)
 {
-	uint16_t t; 
+	uint16_t t;
 	int16_t xerr=0,yerr=0,delta_x,delta_y,distance;
 	int16_t incx,incy,uRow,uCol;
-	delta_x=x2-x1; //计算坐标增量 
+	delta_x=x2-x1; //计算坐标增量
 	delta_y=y2-y1;
 	uRow=x1;//画线起点坐标
 	uCol=y1;
-	if(delta_x>0)incx=1; //设置单步方向 
-	else if (delta_x==0)//垂直线 
+	if(delta_x>0)incx=1; //设置单步方向
+	else if (delta_x==0)//垂直线
 	{
 		OLED_Draw_VLine(x1,y1,y2);//高效率绘制垂直线
 		return;
 	}
 	else {incx=-1;delta_x=-delta_x;}
 	if(delta_y>0)incy=1;
-	else if (delta_y==0)//水平线 
+	else if (delta_y==0)//水平线
 	{
 		OLED_Draw_HLine(x1,y1,x2);//高效率绘制水平线
 		return;
 	}
-	else {incy=-1;delta_y=-delta_x;}
-	if(delta_x>delta_y)distance=delta_x; //选取基本增量坐标轴 
+	else {incy=-1;delta_y=-delta_y;}
+	if(delta_x>delta_y)distance=delta_x; //选取基本增量坐标轴
 	else distance=delta_y;
 	for(t=0;t<distance+1;t++)
 	{
@@ -493,10 +493,10 @@ void OLED_Draw_Circel_part(int16_t x0,int16_t y0,uint8_t r,circle_part_t cPart)
 	int16_t x = 0;
 	int16_t y = r;
 	int16_t d = 3 - r*2;
-	
+
 	while(x <= y)
 	{
-		
+
 		if(cPart&C_RU)OLED_Draw_Pixl(x0 + y, y0 - x);
 		if(cPart&C_UR)OLED_Draw_Pixl(x0 + x, y0 - y);
 		if(cPart&C_UL)OLED_Draw_Pixl(x0 - x, y0 - y);
@@ -505,8 +505,8 @@ void OLED_Draw_Circel_part(int16_t x0,int16_t y0,uint8_t r,circle_part_t cPart)
 		if(cPart&C_DL)OLED_Draw_Pixl(x0 - x, y0 + y);
 		if(cPart&C_DR)OLED_Draw_Pixl(x0 + x, y0 + y);
 		if(cPart&C_RD)OLED_Draw_Pixl(x0 + y, y0 + x);
-		
-		
+
+
 		if(d < 0)
 		{
 			d += x*4 + 6;
@@ -518,7 +518,7 @@ void OLED_Draw_Circel_part(int16_t x0,int16_t y0,uint8_t r,circle_part_t cPart)
 		}
 		x++;
 	}
-	
+
 	//---专门处理反色驱动---
 	x--;
 	if((lcd_driver.Write_GRAM == lcd_driver_Write_inv)||
@@ -547,7 +547,7 @@ void OLED_Fill_Circel_part(int16_t x0,int16_t y0,uint8_t r,circle_part_t cPart)
 	int16_t y = r;
 	int16_t d = 3 - r*2;
 	uint16_t j;
-	
+
 	while(x <= y)
 	{
 			//填充圆角
@@ -570,9 +570,9 @@ void OLED_Fill_Circel_part(int16_t x0,int16_t y0,uint8_t r,circle_part_t cPart)
 		}
 		x++;
 	}
-	
-	
-	
+
+
+
 	//---专门处理反色驱动---
 	if((lcd_driver.Write_GRAM == lcd_driver_Write_inv)||
 		(lcd_driver.Write_GRAM == lcd_driver_Write_1_inBox))
@@ -591,7 +591,7 @@ void OLED_Fill_Circel_part(int16_t x0,int16_t y0,uint8_t r,circle_part_t cPart)
 		if((cPart&(C_UL|C_UR))==(C_UL|C_UR))OLED_Draw_VLine(x0, y0, y0+r);
 		if((cPart&(C_DL|C_DR))==(C_DL|C_DR))OLED_Draw_VLine(x0, y0-r, y0);
 	}
-	
+
 }
 
 
@@ -638,7 +638,7 @@ void OLED_Clear_Box(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max)
 	#endif
 	if((x_min>x_max)||(y_min>y_max)){return;}//错误值,不绘画
 
-	
+
 	ypage   = y_min / 8;
 	offset = y_min % 8;
 	x = x_min;
@@ -709,9 +709,9 @@ void OLED_Clear_Box(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max)
 ----------------------------------------------------------------*/
 void OLED_Fill_Box(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max)
 {
-	uint8_t ypage;
-	uint8_t offset;
-	uint8_t x;
+	uint16_t ypage;
+	uint16_t offset;
+	uint16_t x;
 
 	if(x_max < x_min)
 	{
@@ -729,7 +729,7 @@ void OLED_Fill_Box(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max)
 	if(y_min < 0){y_min=0;}
 	if(x_max > (SCREEN_WIDTH-1)){x_max = (SCREEN_WIDTH-1);}
 
-	
+
 	//---------全屏缓存-----------
 	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	if(y_max > (SCREEN_HIGH-1)){y_max = (SCREEN_HIGH-1);}
@@ -743,9 +743,9 @@ void OLED_Fill_Box(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max)
 	}
 	#endif
 	if((x_min>x_max)||(y_min>y_max)){return;}//错误值,不绘画
-	
 
-	
+
+
 	ypage   = y_min / 8;
 	offset = y_min % 8;
 	x = x_min;
@@ -844,7 +844,7 @@ void OLED_Draw_Bitmap(int16_t x0,int16_t y0,uint8_t sizex,uint8_t sizey,uint8_t 
 	uint32_t i;
 	uint8_t xi;
 	uint8_t yi;
-	
+
 	//---------全屏缓存-----------
 	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 
@@ -855,7 +855,7 @@ void OLED_Draw_Bitmap(int16_t x0,int16_t y0,uint8_t sizex,uint8_t sizey,uint8_t 
 		return;
 	}
 	#endif
-	
+
 	i=0;
 	for(yi=0;yi<sizey;yi+=8)
 	{
@@ -895,40 +895,40 @@ void OLED_Fill_RBox(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max, i
 	int16_t x_max_dec_r;
 	int16_t y_min_add_r;
 	int16_t y_max_dec_r;
-	
+
 	if((x_min>=x_max)||(y_min>=y_max)){return;}//错误值,不绘画
 	if(r<0){r=0;}
-	
+
 	while((x_max - x_min)<(r*2)){r--;}
 	while((y_max - y_min)<(r*2)){r--;}
-	
+
 	x_min_add_r = x_min + r;
 	x_max_dec_r = x_max - r;
 	y_min_add_r = y_min + r;
 	y_max_dec_r = y_max - r;
-	
+
 	OLED_Fill_Circel_part(x_min_add_r,y_min_add_r,r,C_QLU);//左上
 	OLED_Fill_Circel_part(x_max_dec_r,y_min_add_r,r,C_QRU);//右上
 	OLED_Fill_Circel_part(x_min_add_r,y_max_dec_r,r,C_QLD);//左下
 	OLED_Fill_Circel_part(x_max_dec_r,y_max_dec_r,r,C_QRD);//右下
-							
+
 		//左长条
 	OLED_Fill_Box	(x_min,
 								y_min_add_r,
 								x_min_add_r,
 								y_max_dec_r);
-	//中间长条			
+	//中间长条
 	OLED_Fill_Box	(x_min_add_r,
 								y_min,
 								x_max_dec_r,
 								y_max);
-	//右长条					
+	//右长条
 	OLED_Fill_Box	(x_max_dec_r,
 								y_min_add_r,
 								x_max,
 								y_max_dec_r);
-								
-				
+
+
 	//---专门处理用于反色驱动---
 	if((lcd_driver.Write_GRAM == lcd_driver_Write_inv)||
 		(lcd_driver.Write_GRAM == lcd_driver_Write_1_inBox))
@@ -956,7 +956,7 @@ void OLED_Draw_RBox(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max, u
 	int16_t x_max_dec_r;
 	int16_t y_min_add_r;
 	int16_t y_max_dec_r;
-	
+
 	if(x_max < x_min)
 	{
 		int8_t temp = x_min;
@@ -969,29 +969,29 @@ void OLED_Draw_RBox(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max, u
 		y_min = y_max;
 		y_max = temp;
 	}
-	
+
 	//if((x_min>=x_max)||(y_min>=y_max)){return;}//错误值,不绘画
-	
-	
+
+
 	while((x_max - x_min)<(r*2)){r--;}
 	while((y_max - y_min)<(r*2)){r--;}
 	//if(r<0){r=0;}
-	
+
 	x_min_add_r = x_min + r;
 	x_max_dec_r = x_max - r;
 	y_min_add_r = y_min + r;
 	y_max_dec_r = y_max - r;
-	
+
 	OLED_Draw_Circel_part(x_min_add_r,y_min_add_r,r,C_QLU);//左上
 	OLED_Draw_Circel_part(x_max_dec_r,y_min_add_r,r,C_QRU);//右上
 	OLED_Draw_Circel_part(x_min_add_r,y_max_dec_r,r,C_QLD);//左下
 	OLED_Draw_Circel_part(x_max_dec_r,y_max_dec_r,r,C_QRD);//右下
-	
+
 	OLED_Draw_VLine(x_min,y_min_add_r,y_max_dec_r);
 	OLED_Draw_VLine(x_max,y_min_add_r,y_max_dec_r);
 	OLED_Draw_HLine(x_min_add_r,y_min,x_max_dec_r);
 	OLED_Draw_HLine(x_min_add_r,y_max,x_max_dec_r);
-	
+
 	//---专门处理用于反色驱动---
 	if((lcd_driver.Write_GRAM == lcd_driver_Write_inv)||
 		(lcd_driver.Write_GRAM == lcd_driver_Write_1_inBox))
@@ -1005,7 +1005,7 @@ void OLED_Draw_RBox(int16_t x_min,int16_t y_min, int16_t x_max, int16_t y_max, u
 		OLED_Draw_Pixl(x_max,y_min_add_r);
 		OLED_Draw_Pixl(x_max,y_max_dec_r);
 	}
-	
+
 }
 
 /*--------------------------------------------------------------
@@ -1018,7 +1018,7 @@ void OLED_Draw_Ascii(int16_t x,int16_t y,uint8_t chr)
 
 	//---------全屏缓存-----------
 	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
-	
+
 	//---------单页缓存-----------
 	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
 	if((y > (lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM)*8)|| ((y + lcd_driver.fonts_ASCII->high) < (lcd_driver.lcd_refresh_ypage*8)))
@@ -1026,14 +1026,14 @@ void OLED_Draw_Ascii(int16_t x,int16_t y,uint8_t chr)
 		return;
 	}
 	#endif
-	
-	
+
+
 		//不存在的值
 	if((chr<0x20)||(chr>=0x7F))
 	{
 		return;
 	}
-	
+
 	OLED_Draw_Bitmap(
 	x,//左上角坐标x
 	y,//左上角坐标y
@@ -1090,7 +1090,7 @@ void OLED_Draw_Unicode(int16_t x,int16_t y,unicode_t unicode_id)
 	uint16_t i=0;
 	//---------全屏缓存-----------
 	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
-	
+
 	//---------单页缓存-----------
 	#elif ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
 	if((y > (lcd_driver.lcd_refresh_ypage+GRAM_YPAGE_NUM)*8)|| ((y + lcd_driver.fonts_UTF8_cut->high) < (lcd_driver.lcd_refresh_ypage*8)))
@@ -1098,8 +1098,8 @@ void OLED_Draw_Unicode(int16_t x,int16_t y,unicode_t unicode_id)
 		return;
 	}
 	#endif
-	
-	
+
+
 	while((lcd_driver.fonts_UTF8_cut->unicode_index[i]!=0x00)/*&&(lcd_driver.fonts_UTF8_cut->unicode_index[i+1]!=0x00)*/)
 	{
 		//-----------------A方式大小端读取方式根据MCU储存方式选择-------------------
@@ -1108,17 +1108,17 @@ void OLED_Draw_Unicode(int16_t x,int16_t y,unicode_t unicode_id)
 		//	if(lcd_driver.fonts_UTF8_cut->unicode_index[i+1] == unicode_id.u8[0])
 		//	break;
 		//}
-		
+
 		//-----------------B方式大小端读取方式根据MCU储存方式选择-------------------
 		if(((uint8_t*)lcd_driver.fonts_UTF8_cut->unicode_index)[i] == unicode_id.u8[0])
 		{
 			if(lcd_driver.fonts_UTF8_cut->unicode_index[i+1] == unicode_id.u8[1])
 			break;
 		}
-		
+
 		i+=2;
 	}
-	
+
 	if((lcd_driver.fonts_UTF8_cut->unicode_index[i]!=0x00)/*&&(lcd_driver.fonts_UTF8_cut->unicode_index[i+1]!=0x00)*/)
 	{
 		OLED_Draw_Bitmap(
@@ -1139,8 +1139,8 @@ void OLED_Draw_Unicode(int16_t x,int16_t y,unicode_t unicode_id)
 void OLED_Draw_UTF8_String(int16_t x,int16_t y,uint8_t *p)
 {
 	volatile int16_t x_0;
-	
-	
+
+
 	//---------全屏缓存-----------
 	#if ((LCD_MODE == _FULL_BUFF_FULL_UPDATE) || ((LCD_MODE == _FULL_BUFF_DYNA_UPDATE)))//全屏缓存
 	if((x>SCREEN_WIDTH)||(y>(SCREEN_HIGH-1)))
@@ -1161,7 +1161,7 @@ void OLED_Draw_UTF8_String(int16_t x,int16_t y,uint8_t *p)
 	{
 		uint8_t temp = *p & 0xF8;
 		if(temp<=0x7F)//单字节
-		//if(temp < 0xC0)	
+		//if(temp < 0xC0)
 		{
 			//单字节均是ASCII
 			if(*p == '\r')
@@ -1260,11 +1260,11 @@ uint16_t OLED_Get_UTF8_XLen(uint8_t *p)
 		}
 
 		else if(temp<=0x7F)//单字节
-		//if(temp < 0xC0)	
+		//if(temp < 0xC0)
 		{
 			//单字节均是ASCII
 			temp_len += lcd_driver.fonts_ASCII->width+lcd_driver.fonts_ASCII->scape;
-			
+
 			endscape=lcd_driver.fonts_ASCII->scape;
 			p+=1;
 		}
@@ -1324,7 +1324,7 @@ uint16_t OLED_Get_UTF8_YLine(uint8_t *p)
 			line++;
 		}
 		else if(temp<=0x7F)//单字节
-		//else if(temp < 0xC0)	
+		//else if(temp < 0xC0)
 		{
 			//单字节均是ASCII
 			p+=1;
@@ -1351,7 +1351,7 @@ uint16_t OLED_Get_UTF8_YLine(uint8_t *p)
 ----------------------------------------------------------------*/
 void OLED_Fill_value_GRAM(uint8_t value)
 {
-	unsigned char i,n;
+	unsigned int i,n;
 	for(i=0;i<GRAM_YPAGE_NUM;i++)
 	{
 			for(n=0;n<SCREEN_WIDTH;n++)
@@ -1388,24 +1388,24 @@ void OLED_Clear_GRAM(void)
   * 名称: lcd_driver_Init()
   * 功能: 驱动初始化
 ----------------------------------------------------------------*/
-void lcd_driver_Init(void)
+void lcd_driver_init(void)
 {
 	//-------------初始化-------------
 	LCD_Port_Init();
 	LCD_IC_Init();
-	
+
 	//------driver配置默认字体---------
 	//---中英文字体high高度需要一致----
-	
+
 	//lcd_driver.fonts_ASCII = &ascii_SongTi_8X16;//默认ASCII字体
 	//lcd_driver.fonts_UTF8_cut = &SongTi_UTF8_16X16;//默认UTF8字体(裁切)
-	
+
 	lcd_driver.fonts_ASCII = &ascii_SongTi_6X12;//默认ASCII字体
 	lcd_driver.fonts_UTF8_cut = &SongTi_UTF8_12X12;//默认UTF8字体(裁切)
 
 	//lcd_driver.newline_high = lcd_driver.fonts_ASCII->high;   //文本换行距离 (如果没有使用中文,可选择)
 	lcd_driver.newline_high = lcd_driver.fonts_UTF8_cut->high;//文本换行距离 (选择ASCII字体和UTF8字体最大的一个)
-	
+
 	//----------选择驱动模式-----------
 	OLED_Set_Driver_Mode(write_1);              //写1模式(普通) 白点模式
 	//OLED_Set_Driver_Mode(write_0);            //写0模式(普通) 黑点模式
@@ -1415,16 +1415,16 @@ void lcd_driver_Init(void)
 	//OLED_Set_Driver_Mode(write_inverse_inBox);//限制区域内反写模式(高级)
 	OLED_Set_Driver_Box(0,0,SCREEN_WIDTH-1,SCREEN_HIGH-1);//设置"高级"驱动的"限制区域"
 	//----------默认驱动模式-----------
-	
+
 	//-----------显存初始化------------
 	OLED_Clear_GRAM();
 	#if ((LCD_MODE == _PAGE_BUFF_FULL_UPDATE) || (LCD_MODE == _PAGE_BUFF_DYNA_UPDATE))//页缓存
 	lcd_driver.lcd_refresh_ypage=0;//页缓存专用变量, 记录当前刷的是第页
 	#endif
 	//-----------显存初始化------------
-	
+
 	while(LCD_Refresh()!=0);
 
 }
 
-	
+

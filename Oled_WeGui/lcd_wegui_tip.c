@@ -52,18 +52,18 @@ void Wegui_Push_Message_tip(int16_t y, uint8_t* string, uint16_t time)//(推送y
 				break;
 		}
 		string_xlen = OLED_Get_UTF8_XLen(string);
-		string_yline = OLED_Get_UTF8_YLine(Wegui.tip.string);//字符串分了多少行
-		
+		string_yline = OLED_Get_UTF8_YLine(string);//字符串分了多少行
+
 		Wegui.tip.state = ENTERING;
 		Wegui.tip.type=message;
 		Wegui.tip.pos_y = y;																							//动画目标位置y
 		Wegui.tip.pos_x = -(int16_t)string_xlen/2 - TIP_LR_Scape + ((SCREEN_WIDTH/2)-1);	//动画目标位置x
-		
+
 		//初始位置隐藏在上方
 		//Wegui.tip.cur_y = SCREEN_HIGH -(-TIP_TB_Scape-TIP_TB_Scape - Wegui.tip.fonts_high);	//开始位置Y
 		Wegui.tip.cur_y = (-TIP_TB_Scape-TIP_TB_Scape - Wegui.tip.fonts_high*string_yline);	//开始位置Y
 		Wegui.tip.cur_x = Wegui.tip.pos_x;												            //开始位置x
-		
+
 		Wegui.tip.time	=	time;//推送显示时间ms
 		Wegui.tip.string = string;//推送字符内容
 	}
@@ -104,7 +104,7 @@ void Wegui_Push_Slider_tip(int16_t y, uint8_t* string, int16_t *p_value,int16_t 
 			}
 			break;
 	}
-	
+
 	Wegui.tip.state = ENTERING;
 	Wegui.tip.type = slider;
 	Wegui.tip.pos_x = (SCREEN_WIDTH - BAR_TIP_WIDTH)/2;//弹窗目标位置x(默认居中)
@@ -120,8 +120,8 @@ void Wegui_Push_Slider_tip(int16_t y, uint8_t* string, int16_t *p_value,int16_t 
 	Wegui.tip.Change_Value = Change_func;
 	Wegui.tip.Finish_Value = Finish_func;
 	Wegui.tip.change_way = change_way;
-	
-	
+
+
 	if(p_value==0x00)
 	{
 		//tip.string=Wegui_get_string(p_ValueError_String,Wegui.setting.langauge);
@@ -251,35 +251,35 @@ void Wegui_show_tip(uint16_t farmes, uint16_t Tms)
 					pid_p = 3;//退出动画更慢
 					break;
 			}
-			//使用P(PID)的方式,使当前值接近目标值 
+			//使用P(PID)的方式,使当前值接近目标值
 			//(cur_value:当前变量, target_value目标值, P:[0快:15慢], count:连续处理count次)
 			//Value_Change_PID_P(cur_value,target_value,P,count)
 			Value_Change_PID_P( Wegui.tip.cur_x,//当前x位置
 													Wegui.tip.pos_x,//目标x位置
 													pid_p,
 													farmes);
-			
+
 			Value_Change_PID_P( Wegui.tip.cur_y,//当前y位置
 													Wegui.tip.pos_y,//目标y位置
 													pid_p,
 													farmes);
 		}
-		
-		
+
+
 		uint8_t string_yline = OLED_Get_UTF8_YLine(Wegui.tip.string);//字符串分了多少行
 		switch(Wegui.tip.type)
 		{
 			case message:
 			{
 				uint8_t string_xlen = OLED_Get_UTF8_XLen(Wegui.tip.string);
-				
+
 				OLED_Set_Driver_Mode(write_0);//选择0笔刷
 				OLED_Fill_RBox		(Wegui.tip.cur_x-TIP_BOX_THICHNESS ,
 													Wegui.tip.cur_y-TIP_BOX_THICHNESS,
 													Wegui.tip.cur_x+string_xlen+TIP_LR_Scape+TIP_LR_Scape+TIP_BOX_THICHNESS,
 													Wegui.tip.cur_y+string_yline*Wegui.tip.fonts_high+TIP_TB_Scape+TIP_TB_Scape+TIP_BOX_THICHNESS,
 													TIP_BOX_R+TIP_BOX_THICHNESS);
-													
+
 				OLED_Set_Driver_Mode(write_1);//选择1笔刷
 				OLED_Draw_RBox	(Wegui.tip.cur_x ,
 															Wegui.tip.cur_y,
@@ -289,44 +289,44 @@ void Wegui_show_tip(uint16_t farmes, uint16_t Tms)
 				//居中显示提示文字
 				OLED_Draw_UTF8_String	(Wegui.tip.cur_x+TIP_LR_Scape,
 															Wegui.tip.cur_y+TIP_TB_Scape,
-															Wegui.tip.string);		
-												
-														
+															Wegui.tip.string);
+
+
 				if(Wegui.tip.time > Tms)
 				{
 					Wegui.tip.time -= Tms;
-				}		
+				}
 				else
 				{
 					Wegui.tip.time = 0;
 					Wegui.tip.state = EXITING;//弹窗正在退出
 				}
-				
+
 			}break;
 			case slider:
 			{
-				
+
 					OLED_Set_Driver_Mode(write_0);//选择0笔刷
 					OLED_Fill_RBox		(Wegui.tip.cur_x-TIP_BOX_THICHNESS ,
 														Wegui.tip.cur_y-TIP_BOX_THICHNESS,
 														Wegui.tip.cur_x+BAR_TIP_WIDTH+TIP_BOX_THICHNESS,
 														Wegui.tip.cur_y+BAR_TIP_HIGHT+TIP_BOX_THICHNESS,
 														TIP_BOX_R+TIP_BOX_THICHNESS);
-					
+
 					OLED_Set_Driver_Mode(write_1);//选择1笔刷
 					OLED_Draw_RBox	(Wegui.tip.cur_x ,
 																Wegui.tip.cur_y,
 																Wegui.tip.cur_x+BAR_TIP_WIDTH,
 																Wegui.tip.cur_y+BAR_TIP_HIGHT,
-																TIP_BOX_R);	
-					
+																TIP_BOX_R);
+
 					//进度条边框
 					OLED_Draw_RBox	(Wegui.tip.cur_x + BAR_TIP_SIDE_SCAPE,
 																Wegui.tip.cur_y + Wegui.tip.fonts_high*string_yline + BAR_TIP_TOP_SCAPE + BAR_TO_CHAR_SCAPE,
 																Wegui.tip.cur_x  + BAR_TIP_SIDE_SCAPE + BAR_WIDTH,
 																Wegui.tip.cur_y + Wegui.tip.fonts_high*string_yline + BAR_TIP_TOP_SCAPE + BAR_TO_CHAR_SCAPE + BAR_HIGHT,
 																2);
-																
+
 					//进度
 					OLED_Fill_RBox				(Wegui.tip.cur_x + BAR_TIP_SIDE_SCAPE,
 																Wegui.tip.cur_y + Wegui.tip.fonts_high*string_yline + BAR_TIP_TOP_SCAPE + BAR_TO_CHAR_SCAPE,
@@ -334,17 +334,17 @@ void Wegui_show_tip(uint16_t farmes, uint16_t Tms)
 																Wegui.tip.cur_y + Wegui.tip.fonts_high*string_yline + BAR_TIP_TOP_SCAPE + BAR_TO_CHAR_SCAPE + BAR_HIGHT,
 																2);
 					uint8_t string[7];
-					itoa(Wegui.tip.show_Value,string,10);//数值转10进制字符串, 传递回给字符串指针
-					
+					my_itoa(Wegui.tip.show_Value,string,10);//数值转10进制字符串, 传递回给字符串指针
+
 					OLED_Draw_UTF8_String	(Wegui.tip.cur_x + BAR_TIP_SIDE_SCAPE,
 													Wegui.tip.cur_y + BAR_TIP_TOP_SCAPE/* + (string_yline-1)*string_yline*/,
 													Wegui.tip.string);
-													
+
 					OLED_Draw_UTF8_String	(Wegui.tip.cur_x + BAR_TIP_SIDE_SCAPE + BAR_WIDTH - OLED_Get_UTF8_XLen(string),
 													Wegui.tip.cur_y + BAR_TIP_TOP_SCAPE + (string_yline-1)*Wegui.tip.fonts_high,
 													string);
-													
-					
+
+
 			}break;
 		}
 		switch(Wegui.tip.state)
@@ -370,7 +370,7 @@ void Wegui_show_tip(uint16_t farmes, uint16_t Tms)
 				}
 				break;
 		}
-	}		
+	}
 }
 
 

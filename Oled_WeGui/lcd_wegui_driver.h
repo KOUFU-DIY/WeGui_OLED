@@ -67,7 +67,7 @@ typedef enum langauge
 {
 	en_US=0,//英语
 	zh_CN,//简体中文
-	
+
 }langage_t;
 //-----多语言字符串------
 typedef struct langauge_string_t
@@ -82,10 +82,10 @@ typedef struct Wegui_t_setting
 	int16_t brightness;   //系统亮度
 	int16_t ui_fps_ms;    //ui绘制时间(建议与刷屏同步)
 	int16_t screen_fps_ms;//屏幕刷新时间(建议与刷屏同步)
-	
+
 	//const fonts_t *fonts_ASCII;   //ASCII字体
 	//const fonts_t *fonts_UTF8_cut;//UTF8裁剪字体
-	
+
 }setting_t;
 //-----------------系统信息------------------
 typedef struct Wegui_sysInfo
@@ -94,7 +94,7 @@ typedef struct Wegui_sysInfo
 	uint16_t cpu_load;//实时刷新率
 	uint16_t cpu_time;//刷屏函数总占用时间
 	uint16_t fps_time;//屏幕刷新时间
-	
+
 }sysInfo_t;
 //------------------菜单&控件------------------
 
@@ -144,14 +144,14 @@ typedef struct wSliderTip_Propertys
 	void (*Push_tip_func)();    //控件进入 执行一次
 	void (*Change_Value_func)();//值被修改 执行一次
 	void (*End_tip_func)();     //控件退出 执行一次
-}wSliderTip_Par_t;	
+}wSliderTip_Par_t;
 
 typedef struct wMessage_Propertys
 {
 	void (*Press_func)();              //按下执行一次
 	uint8_t* Value_string;             //末尾显示的值 0x00不显示
 	Wegui_string_t Tip_string;         //提示框字符串
-}wMessage_Par_t;	
+}wMessage_Par_t;
 
 
 
@@ -175,7 +175,7 @@ typedef struct menu_t
 	/*const*/ Wegui_string_t discribe;//多语言描述
 	menuType_t menuType;//菜单类型
 	menuType_Par_t menuPar;//菜单属性
-	
+
 	uint8_t history_cursor_id;//光标历史记录
 	int16_t history_pos;//位置历史记录
 }menu_t;
@@ -219,24 +219,24 @@ typedef struct Wegui_tip
 	tip_state_t state;//有无弹窗
 	tip_type_t type;//当前弹窗的类型
 	uint8_t fonts_high;
-	
+
 	int16_t   pos_y;//目标位置y
 	int16_t   pos_x;//目标位置x
 	int16_t   cur_y;//当前位置y
 	int16_t   cur_x;//当前位置x
 	int16_t   time;//时间
 	uint8_t*  string;//字符串
-	
-	
+
+
 	int16_t* pvalue;//待修改的参数的指针(调值弹窗有效)
 	int16_t show_Value;//弹窗显示值
 	int16_t pvalue_min;//待修改的参数的最小值(调值弹窗有效)
 	int16_t pvalue_max;//待修改的参数的最大值(调值弹窗有效)
 	value_change_t change_way;//改值方式
-	
+
 	void (*Change_Value)();
 	void (*Finish_Value)();
-	
+
 }Wegui_tip_t;
 
 
@@ -254,14 +254,14 @@ typedef struct Wegui_t
 
 
 /*--------------------------------------------------------------
-  * 名称: *itoa(int16_t num,uint8_t *str,uint8_t radix)
+  * 名称: *my_itoa(int16_t num,uint8_t *str,uint8_t radix)
   * 传入1: num 数字
   * 传入2: *str (空)字符串指针
 	* 传入3: radix 进制数
   * 功能: 数字转成字符串,保存到*str里
   * 说明:iota = integer to alphanumeric 把整型数转换成字符串
 ----------------------------------------------------------------*/
-uint8_t *itoa(int16_t num,uint8_t *str,uint8_t radix);
+uint8_t *my_itoa(int16_t num,uint8_t *str,uint8_t radix);
 /*--------------------------------------------------------------
   * 名称: Get_submenu_sum(menu_t* m)
   * 传入: m:查询的菜单
@@ -284,7 +284,7 @@ void Wegui_key_interface_stick(uint16_t ms);
 
 void Wegui_loop_func(void);//放到主循环
 void Wegui_1ms_stick(void);//放到1ms中断
-void OLED_Wegui_Init(void);
+void lcd_wegui_init(void);
 
 
 extern Wegui_t Wegui;

@@ -105,19 +105,10 @@ void Wegui_show_mList(uint16_t farmes)
 		string=Wegui_get_string(Wegui.menu->titel,Wegui.setting.langauge);
 		OLED_Draw_UTF8_String(LINE0_START_X_SCAPE,temp_y,(uint8_t*)string);
 		
-
-		uint8_t str[6];
-		itoa(SystemCoreClock/1000000,str,10);//数值转10进制字符串, 传递回给字符串指针			
-		str[2]='M';str[3]='H';str[4]='z';str[5]='\0';
+		uint8_t *str=(uint8_t*)"OLED";
 		OLED_Draw_UTF8_String	(SCREEN_WIDTH - 1 - OLED_Get_UTF8_XLen(str) - 2,
 															temp_y,
 															str);
-
-		/*
-		OLED_Draw_UTF8_String	(SCREEN_WIDTH - 1 - OLED_Get_UTF8_XLen((uint8_t*)"Wegui") - 2,
-															temp_y,
-															(uint8_t*)"Wegui");//LOGO
-		*/
 	}
 	uint16_t temp_show_id_max = 1+(mList_par.list_y_offset_cur + 
 	(mList_par.list_y_scape-mList_par.list_font_high) + SCREEN_HIGH)/mList_par.list_y_scape;
@@ -153,7 +144,7 @@ void Wegui_show_mList(uint16_t farmes)
 						if(p->menuPar.wSliderTip_Par.pstr != 0x00)
 						{
 							uint8_t str[7];
-							itoa(*p->menuPar.wSliderTip_Par.pstr,str,10);//数值转10进制字符串, 传递回给字符串指针			
+							my_itoa(*p->menuPar.wSliderTip_Par.pstr,str,10);//数值转10进制字符串, 传递回给字符串指针			
 							OLED_Draw_UTF8_String	(SCREEN_WIDTH - 1 - OLED_Get_UTF8_XLen(str) -2,
 															temp_y,
 															str);
